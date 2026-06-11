@@ -27,22 +27,22 @@
 
 **Requirement mapping:** FR-014, FR-015, NFR-004  
 **Type:** Foundation  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Add `pyproject.toml`.
-- [ ] Add package initialization files.
-- [ ] Add application config module.
-- [ ] Add structured logging module.
-- [ ] Add minimal README with development commands.
-- [ ] Add `.env.example`.
+- [x] Add `pyproject.toml`.
+- [x] Add package initialization files.
+- [x] Add application config module.
+- [x] Add structured logging module.
+- [x] Add minimal README with development commands.
+- [x] Add `.env.example`.
 
 ### Acceptance Criteria
 
-- [ ] Package imports as `grna`.
-- [ ] Project can install in editable mode.
-- [ ] Basic lint/test commands are documented.
+- [x] Package imports as `grna`.
+- [x] Project can install in editable mode.
+- [x] Basic lint/test commands are documented.
 
 ## Task T-003 - Define Core Data Models
 

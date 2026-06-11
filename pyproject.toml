@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bosgenesis-release-note-agent"
+version = "0.1.0"
+description = "Evidence-backed GitHub release note intelligence agent."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+  { name = "BOS Genesis" }
+]
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.30.0",
+  "pydantic>=2.8.0",
+  "jinja2>=3.1.0",
+  "markdown-it-py>=3.0.0",
+  "GitPython>=3.1.0",
+  "typer>=0.12.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+  "ruff>=0.5.0",
+]
+pdf = [
+  "reportlab>=4.0.0",
+]
+mcp = [
+  "mcp>=1.0.0",
+]
+
+[project.scripts]
+grna = "grna.cli.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+

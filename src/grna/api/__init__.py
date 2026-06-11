@@ -1,0 +1,2 @@
+"""REST API adapter package."""
+
