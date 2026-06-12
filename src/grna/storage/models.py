@@ -26,6 +26,7 @@ class JobRecord:
     updated_at: str
     repo_url: str | None = None
     progress_percent: int = 0
+    error_code: str | None = None
     error_message: str | None = None
     payload: dict[str, Any] | None = None
 
@@ -60,6 +61,7 @@ class JobRecord:
     def from_dict(cls, payload: dict[str, Any]) -> JobRecord:
         """Deserialize from a JSON-compatible dictionary."""
 
+        payload.setdefault("error_code", None)
         return cls(**payload)
 
 

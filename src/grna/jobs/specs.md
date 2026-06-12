@@ -25,6 +25,7 @@ Manage asynchronous scan and release-note generation workflows from job creation
 - Stage progress events.
 - Persisted job state and errors.
 - Final artifact references.
+- Validation errors for invalid state transitions.
 
 ## Expected Stages
 
@@ -47,8 +48,19 @@ Manage asynchronous scan and release-note generation workflows from job creation
 ## Design Rules
 
 - State transitions must be explicit and testable.
+- Valid transitions are defined in `states.py`; terminal jobs cannot move to new stages.
+- The orchestrator must be storage-backend agnostic and operate through `JobStore`.
+- Progress updates must stay between 0 and 100.
+- Failure handling must preserve both `error_code` and `error_message`.
 - Jobs must be resumable or safely fail with useful errors where possible.
 - Request threads and MCP handlers must not block on full scans.
 - Every stage should emit structured logs and audit events.
 - Failures must preserve partial evidence when safe.
 
+## Implemented Foundation
+
+- `JobStatus` defines `queued`, `running`, `completed`, `failed`, and `cancelled`.
+- `JobStage` defines the explicit scan and generation stages.
+- `JobOrchestrator` creates jobs, transitions stages, updates progress, completes,
+  fails, and cancels jobs.
+- Invalid transitions raise `InvalidJobTransitionError`.

@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
 from uuid import uuid4
 
 from pydantic import ValidationError
 
 from grna.config import AppConfig, get_config
-from grna.storage import ArtifactStore, JobNotFoundError, JobRecord, JobStore
+from grna.jobs import InvalidJobTransitionError, JobOrchestrator
+from grna.storage import ArtifactStore, JobNotFoundError, JobStore
 from grna.storage.local import LocalArtifactStore, LocalJsonJobStore
 
 from .schemas import (
@@ -49,6 +49,7 @@ class ReleaseNoteMcpTools:
     ) -> None:
         self.job_store = job_store or create_default_job_store()
         self.artifact_store = artifact_store or create_default_artifact_store()
+        self.orchestrator = JobOrchestrator(self.job_store)
 
     def list_tools(self) -> dict[str, dict]:
         """Return available tool schemas."""
@@ -92,12 +93,11 @@ class ReleaseNoteMcpTools:
 
         request = ScanStartRequest.model_validate(arguments)
         job_id = f"scan_{uuid4().hex}"
-        job = JobRecord.new(
-            job_id=job_id,
+        job = self.orchestrator.create_job(
             repo_url=request.repo_url,
+            job_id=job_id,
             payload=request.model_dump(mode="json"),
         )
-        self.job_store.save(job)
         return {
             "job_id": job.job_id,
             "status": job.status,
@@ -268,13 +268,7 @@ class ReleaseNoteMcpTools:
                 "cancelled": job.status == "cancelled",
                 "message": "Job is already in a terminal state.",
             }
-        cancelled_job = replace(
-            job,
-            status="cancelled",
-            stage="cancelled",
-            progress_percent=0,
-        )
-        self.job_store.save(cancelled_job)
+        cancelled_job = self.orchestrator.cancel_job(job.job_id)
         return {
             "job_id": cancelled_job.job_id,
             "status": cancelled_job.status,
@@ -362,4 +356,10 @@ def error_payload(exc: Exception) -> dict:
         return {"error_code": "JOB_NOT_FOUND", "message": str(exc), "retryable": False}
     if isinstance(exc, ToolExecutionError):
         return {"error_code": "UNKNOWN_TOOL", "message": str(exc), "retryable": False}
+    if isinstance(exc, InvalidJobTransitionError):
+        return {
+            "error_code": "INVALID_JOB_TRANSITION",
+            "message": str(exc),
+            "retryable": False,
+        }
     return {"error_code": "MCP_TOOL_ERROR", "message": str(exc), "retryable": False}

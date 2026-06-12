@@ -11,10 +11,12 @@ Persist jobs, evidence, analytics, generated artifacts, and audit data.
 - Store normalized evidence and analytics JSON.
 - Store artifact metadata and checksums.
 - Provide safe artifact path resolution.
+- Persist job `error_code` and `error_message` for failed jobs.
 
 ## Inputs
 
 - Job records.
+- Job state machine updates.
 - Evidence items.
 - Analytics bundles.
 - Diagram and report artifacts.
@@ -23,6 +25,7 @@ Persist jobs, evidence, analytics, generated artifacts, and audit data.
 ## Outputs
 
 - Persisted records and lookup results.
+- Job status, stage, progress, and failure details.
 - Artifact paths constrained to configured roots.
 - Checksums and metadata for generated files.
 - Migration definitions through the migrations submodule.
@@ -43,4 +46,4 @@ Persist jobs, evidence, analytics, generated artifacts, and audit data.
 - Database writes should be transactional for job state transitions.
 - Partial scan results should be persistable.
 - Secrets must not be stored in plaintext evidence or artifacts.
-
+- JSON-backed job records must remain compatible with future PostgreSQL storage.

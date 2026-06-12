@@ -10,6 +10,7 @@ Expose the agent as an MCP-compatible tool server so Codex, Kiro, Claude Code, B
 - Map tool calls to the shared application service layer.
 - Return deterministic, structured tool responses.
 - Avoid heavy work inside tool handlers by creating jobs and returning job IDs.
+- Use the job orchestrator for job creation and cancellation.
 
 ## Inputs
 
@@ -43,4 +44,4 @@ Expose the agent as an MCP-compatible tool server so Codex, Kiro, Claude Code, B
 - MCP mode must be able to run without REST mode.
 - Tool responses must not leak local secrets or unrestricted paths.
 - Long-running work must be represented as async jobs.
-
+- Invalid job state transitions must return stable structured errors.

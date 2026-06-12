@@ -91,21 +91,21 @@
 
 **Requirement mapping:** FR-001, NFR-001  
 **Type:** Foundation  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Define job states and valid transitions.
-- [ ] Implement job orchestrator skeleton.
-- [ ] Implement progress and stage update helpers.
-- [ ] Implement failure handling.
-- [ ] Add unit tests for valid and invalid transitions.
+- [x] Define job states and valid transitions.
+- [x] Implement job orchestrator skeleton.
+- [x] Implement progress and stage update helpers.
+- [x] Implement failure handling.
+- [x] Add unit tests for valid and invalid transitions.
 
 ### Acceptance Criteria
 
-- [ ] Jobs move through explicit states.
-- [ ] Invalid transitions are rejected or logged.
-- [ ] Failures preserve error code and message.
+- [x] Jobs move through explicit states.
+- [x] Invalid transitions are rejected or logged.
+- [x] Failures preserve error code and message.
 
 ## Task T-006 - Implement GitHub URL Validation
 

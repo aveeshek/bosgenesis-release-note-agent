@@ -23,6 +23,7 @@ The package must implement an evidence-first system: repository facts are collec
 ## Outputs
 
 - Scan job status and stage progression.
+- Explicit job state transitions with progress and failure details.
 - Repository inventory and normalized evidence.
 - Analytics bundles for technology, intent, features, code, interfaces, commits, tests, coverage, and specs.
 - Mermaid/C4/deployment diagram artifacts.
@@ -34,6 +35,6 @@ The package must implement an evidence-first system: repository facts are collec
 - Keep analyzers modular and independently testable.
 - Use structured models for contracts crossing module boundaries.
 - Keep REST, MCP, and CLI as adapters over the same service layer.
+- Keep job lifecycle changes behind the shared job orchestrator.
 - Every major generated claim must reference evidence where possible.
 - Missing data must be reported explicitly, not hidden.
-
