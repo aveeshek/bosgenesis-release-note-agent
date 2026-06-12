@@ -1,0 +1,67 @@
+# BOS Genesis Release Note Agent client registration examples.
+#
+# Paste the [mcp_servers.bosgenesis_release_note_agent] block into:
+#   C:\Users\edutavi\.codex\config.toml
+
+[mcp_servers.bosgenesis_release_note_agent]
+enabled = true
+url = "http://release-note-agent.bosgenesis.local/mcp"
+startup_timeout_sec = 20
+tool_timeout_sec = 180
+default_tools_approval_mode = "prompt"
+enabled_tools = [
+  "github_release_scan_start",
+  "github_release_scan_status",
+  "github_release_get_analytics",
+  "github_release_generate_note",
+  "github_release_get_artifact",
+  "github_release_list_evidence",
+  "github_release_get_diagrams",
+  "github_release_note_submit_job",
+  "github_release_note_get_job_status",
+  "github_release_note_list_artifacts",
+  "github_release_note_get_artifact",
+  "github_release_note_get_evidence",
+  "github_release_note_cancel_job",
+  "github_repo_scan_only",
+  "github_commit_analytics_only",
+  "github_code_analytics_only",
+  "scan_github_repository",
+  "get_release_note_job_status",
+  "get_repository_analysis_summary",
+  "generate_release_note",
+  "get_release_note_artifact",
+  "get_release_note_artifacts",
+]
+
+[agent]
+name = "bosgenesis-release-note-agent"
+description = "BOS Genesis agent for generating evidence-backed release notes from public GitHub repositories."
+namespace = "bosgenesis"
+base_url = "http://release-note-agent.bosgenesis.local"
+health_url = "http://release-note-agent.bosgenesis.local/health"
+mcp_url = "http://release-note-agent.bosgenesis.local/mcp"
+tools_url = "http://release-note-agent.bosgenesis.local/mcp/tools"
+
+[agent.kubernetes]
+namespace = "bosgenesis"
+api_service = "bosgenesis-release-note-agent-api"
+api_port = 8080
+mcp_service = "bosgenesis-release-note-agent-mcp"
+mcp_port = 8090
+ingress = "bosgenesis-release-note-agent"
+ingress_host = "release-note-agent.bosgenesis.local"
+
+[kiro.mcp_servers.bosgenesis_release_note_agent]
+enabled = true
+url = "http://release-note-agent.bosgenesis.local/mcp"
+
+[claude_cli.mcpServers.bosgenesis_release_note_agent]
+type = "http"
+url = "http://release-note-agent.bosgenesis.local/mcp"
+enabled = true
+
+[http_compat]
+base_url = "http://release-note-agent.bosgenesis.local"
+tools_url = "http://release-note-agent.bosgenesis.local/mcp/tools"
+enabled = true

@@ -71,21 +71,21 @@
 
 **Requirement mapping:** FR-021, NFR-005  
 **Type:** Foundation  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Implement local in-memory or JSON-backed job store for MVP.
-- [ ] Implement root-bound artifact path helper.
-- [ ] Implement artifact metadata creation.
-- [ ] Implement checksum generation.
-- [ ] Add unit tests for path safety.
+- [x] Implement local in-memory or JSON-backed job store for MVP.
+- [x] Implement root-bound artifact path helper.
+- [x] Implement artifact metadata creation.
+- [x] Implement checksum generation.
+- [x] Add unit tests for path safety.
 
 ### Acceptance Criteria
 
-- [ ] Artifacts cannot be written outside configured artifact root.
-- [ ] Job status can be saved and retrieved locally.
-- [ ] Artifact metadata includes path, type, timestamp, and checksum.
+- [x] Artifacts cannot be written outside configured artifact root.
+- [x] Job status can be saved and retrieved locally.
+- [x] Artifact metadata includes path, type, timestamp, and checksum.
 
 ## Task T-005 - Implement Job State Machine
 
@@ -457,21 +457,21 @@
 
 **Requirement mapping:** FR-015  
 **Type:** MCP  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Add MCP server entrypoint.
-- [ ] Add scan start tool.
-- [ ] Add scan status tool.
-- [ ] Add analytics retrieval tool.
-- [ ] Add artifact retrieval tool.
-- [ ] Add MCP schema tests.
+- [x] Add MCP server entrypoint.
+- [x] Add scan start tool.
+- [x] Add scan status tool.
+- [x] Add analytics retrieval tool.
+- [x] Add artifact retrieval tool.
+- [x] Add MCP schema tests.
 
 ### Acceptance Criteria
 
-- [ ] MCP tools delegate to shared service layer.
-- [ ] MCP tool responses are structured and deterministic.
+- [x] MCP tools delegate to shared service layer.
+- [x] MCP tool responses are structured and deterministic.
 
 ## Task T-024 - Build End-to-End MVP Flow
 
@@ -555,21 +555,21 @@
 
 **Requirement mapping:** Phase 5 Production Hardening  
 **Type:** Deployment  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Add `Chart.yaml`.
-- [ ] Add values file.
-- [ ] Add API deployment/service templates.
-- [ ] Add MCP deployment/service templates.
-- [ ] Add worker deployment template.
-- [ ] Add artifact PVC template.
+- [x] Add `Chart.yaml`.
+- [x] Add values file.
+- [x] Add API deployment/service templates.
+- [x] Add MCP deployment/service templates.
+- [x] Add worker deployment template.
+- [x] Add artifact PVC template.
 
 ### Acceptance Criteria
 
-- [ ] Helm template renders without errors.
-- [ ] Secret values are referenced, not embedded.
+- [x] Helm template renders without errors.
+- [x] Secret values are referenced, not embedded.
 
 ## Task T-029 - Acceptance Test Suite
 

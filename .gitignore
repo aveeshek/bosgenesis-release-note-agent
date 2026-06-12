@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+data/jobs/*.json
+data/artifacts/**
+data/logs/**
+!data/jobs/.gitkeep
+!data/artifacts/.gitkeep
+!data/logs/.gitkeep
+

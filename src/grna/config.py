@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
-DEFAULT_APP_NAME = "github-release-note-agent"
+DEFAULT_APP_NAME = "bosgenesis-release-note-agent"
 DEFAULT_ENVIRONMENT = "local"
 DEFAULT_LOG_LEVEL = "INFO"
 DEFAULT_LOG_FORMAT = "json"
@@ -17,11 +17,20 @@ DEFAULT_MCP_HOST = "0.0.0.0"
 DEFAULT_MCP_PORT = 8090
 DEFAULT_WORKSPACE_ROOT = Path("data/workspaces")
 DEFAULT_ARTIFACT_ROOT = Path("data/artifacts")
+DEFAULT_JOB_ROOT = Path("data/jobs")
 DEFAULT_LOG_ROOT = Path("data/logs")
 DEFAULT_MAX_REPO_SIZE_MB = 500
 DEFAULT_MAX_FILE_SIZE_MB = 10
 DEFAULT_CLONE_TIMEOUT_SECONDS = 120
 DEFAULT_ANALYSIS_TIMEOUT_SECONDS = 600
+DEFAULT_MCP_ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "release-note-agent.bosgenesis.local",
+    "bosgenesis-release-note-agent-mcp",
+    "bosgenesis-release-note-agent-mcp.bosgenesis.svc",
+    "bosgenesis-release-note-agent-mcp.bosgenesis.svc.cluster.local",
+]
 
 
 def _get_bool(name: str, default: bool) -> bool:
@@ -42,6 +51,13 @@ def _get_path(name: str, default: str) -> Path:
     return Path(os.getenv(name, default)).expanduser()
 
 
+def _get_csv(name: str, default: list[str]) -> list[str]:
+    raw_value = os.getenv(name)
+    if raw_value is None or raw_value.strip() == "":
+        return default
+    return [item.strip() for item in raw_value.split(",") if item.strip()]
+
+
 @dataclass(frozen=True, slots=True)
 class AppConfig:
     """Runtime configuration shared by API, MCP, CLI, and worker modes."""
@@ -57,8 +73,10 @@ class AppConfig:
     api_port: int = DEFAULT_API_PORT
     mcp_host: str = DEFAULT_MCP_HOST
     mcp_port: int = DEFAULT_MCP_PORT
+    mcp_allowed_hosts: list[str] | None = None
     workspace_root: Path = DEFAULT_WORKSPACE_ROOT
     artifact_root: Path = DEFAULT_ARTIFACT_ROOT
+    job_root: Path = DEFAULT_JOB_ROOT
     log_root: Path = DEFAULT_LOG_ROOT
     max_repo_size_mb: int = DEFAULT_MAX_REPO_SIZE_MB
     max_file_size_mb: int = DEFAULT_MAX_FILE_SIZE_MB
@@ -87,8 +105,10 @@ class AppConfig:
             api_port=_get_int("GRNA_API_PORT", DEFAULT_API_PORT),
             mcp_host=os.getenv("GRNA_MCP_HOST", DEFAULT_MCP_HOST),
             mcp_port=_get_int("GRNA_MCP_PORT", DEFAULT_MCP_PORT),
+            mcp_allowed_hosts=_get_csv("GRNA_MCP_ALLOWED_HOSTS", DEFAULT_MCP_ALLOWED_HOSTS),
             workspace_root=_get_path("GRNA_WORKSPACE_ROOT", str(DEFAULT_WORKSPACE_ROOT)),
             artifact_root=_get_path("GRNA_ARTIFACT_ROOT", str(DEFAULT_ARTIFACT_ROOT)),
+            job_root=_get_path("GRNA_JOB_ROOT", str(DEFAULT_JOB_ROOT)),
             log_root=_get_path("GRNA_LOG_ROOT", str(DEFAULT_LOG_ROOT)),
             max_repo_size_mb=_get_int("GRNA_MAX_REPO_SIZE_MB", DEFAULT_MAX_REPO_SIZE_MB),
             max_file_size_mb=_get_int("GRNA_MAX_FILE_SIZE_MB", DEFAULT_MAX_FILE_SIZE_MB),

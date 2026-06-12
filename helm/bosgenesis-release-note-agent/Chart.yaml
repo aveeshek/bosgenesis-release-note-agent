@@ -1,0 +1,7 @@
+apiVersion: v2
+name: bosgenesis-release-note-agent
+description: GitHub Release Note Intelligence Agent
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+

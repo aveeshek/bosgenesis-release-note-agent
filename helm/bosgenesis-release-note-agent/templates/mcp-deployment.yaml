@@ -1,0 +1,69 @@
+{{- if .Values.mcp.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "bosgenesis-release-note-agent.fullname" . }}-mcp
+  labels:
+    {{- include "bosgenesis-release-note-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mcp
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "bosgenesis-release-note-agent.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: mcp
+  template:
+    metadata:
+      labels:
+        {{- include "bosgenesis-release-note-agent.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: mcp
+    spec:
+      serviceAccountName: {{ include "bosgenesis-release-note-agent.serviceAccountName" . }}
+      containers:
+        - name: mcp
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - python
+            - -m
+            - uvicorn
+            - grna.mcp.server:create_mcp_app
+            - --factory
+            - --host
+            - "0.0.0.0"
+            - --port
+            - {{ .Values.mcp.port | quote }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.mcp.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "bosgenesis-release-note-agent.fullname" . }}-config
+          env:
+            - name: GRNA_MCP_PORT
+              value: {{ .Values.mcp.port | quote }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+          resources:
+            {{- toYaml .Values.mcp.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+      volumes:
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "bosgenesis-release-note-agent.fullname" . }}-data
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+{{- end }}
+
