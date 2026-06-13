@@ -29,6 +29,22 @@ def test_scan_start_creates_queued_job(tmp_path) -> None:
 
     status = tools.github_release_scan_status({"job_id": result["job_id"]})
     assert status["repo_url"] == "https://github.com/aveeshek/bosgenesis-mop-creation-agent"
+    assert status["payload"]["github_repository"]["full_name"] == (
+        "aveeshek/bosgenesis-mop-creation-agent"
+    )
+
+
+def test_scan_start_rejects_local_filesystem_path(tmp_path) -> None:
+    client = TestClient(create_mcp_app(_tools(tmp_path)))
+
+    response = client.post(
+        "/mcp/tools/github_release_scan_start",
+        json={"repo_url": "C:/tmp/local-repo"},
+    )
+
+    payload = response.json()
+    assert payload["ok"] is False
+    assert payload["error"]["error_code"] == "LOCAL_PATH_REJECTED"
 
 
 def test_artifact_tool_returns_saved_artifacts(tmp_path) -> None:

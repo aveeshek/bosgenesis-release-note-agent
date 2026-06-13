@@ -7,7 +7,8 @@ __pycache__/
 data/jobs/*.json
 data/artifacts/**
 data/logs/**
+data/workspaces/**
 !data/jobs/.gitkeep
 !data/artifacts/.gitkeep
 !data/logs/.gitkeep
-
+!data/workspaces/.gitkeep

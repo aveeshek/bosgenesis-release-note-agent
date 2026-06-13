@@ -27,7 +27,9 @@ Validate that the agent safely scans public repositories, builds evidence-backed
 
 - URL validation and GitHub fetching.
 - Job state transitions.
+- Repository inventory classification, important file detection, and generated-folder skip rules.
 - Analyzer contracts and evidence references.
+- Deterministic evidence IDs, evidence lookup, commit/fact records, and redaction.
 - Technology, code, interface, test, coverage, commit, and spec analyzers.
 - Diagram generation.
 - Markdown, HTML, and PDF report generation.
@@ -41,4 +43,3 @@ Validate that the agent safely scans public repositories, builds evidence-backed
 - External network integration tests should be opt-in.
 - Golden report tests must tolerate timestamps and stable generated IDs through normalization.
 - Unit tests should use fixture repositories when possible.
-

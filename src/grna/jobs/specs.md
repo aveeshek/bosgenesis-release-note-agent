@@ -15,6 +15,7 @@ Manage asynchronous scan and release-note generation workflows from job creation
 ## Inputs
 
 - Validated scan request.
+- GitHub fetch metadata from the repository module.
 - Runtime configuration for queue, workspace, artifact storage, and limits.
 - Worker execution events and analyzer results.
 
@@ -64,3 +65,5 @@ Manage asynchronous scan and release-note generation workflows from job creation
 - `JobOrchestrator` creates jobs, transitions stages, updates progress, completes,
   fails, and cancels jobs.
 - Invalid transitions raise `InvalidJobTransitionError`.
+- Later worker tasks should move jobs through `fetching_repository` only after
+  `RepositoryFetcher` has produced fetch metadata.

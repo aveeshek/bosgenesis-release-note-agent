@@ -45,3 +45,13 @@ Provide the normalized evidence model that connects repository facts to generate
 - Claims without evidence must be marked as inferred or unavailable.
 - Evidence storage must preserve enough metadata for audit and debugging.
 
+## Implemented Evidence Indexer Contract
+
+- `EvidenceRecord` stores evidence ID, job ID, source type, source path, content hash, report-ready summary, sensitivity flag, and metadata.
+- `EvidenceIndex` provides lookup by ID through `get()` and strict lookup through `require()`.
+- `EvidenceIndexer` creates deterministic evidence IDs from job ID, source type, normalized source key, and content hash.
+- Inventory evidence links back to `InventoryFile.evidence_id` without mutating the original inventory object.
+- File evidence maps coverage files to `coverage_report`, tests to `test_report`, important docs to `spec_document`, and all other files to `file`.
+- Commit evidence is supported from commit SHA and summary metadata.
+- Fact evidence is supported for analyzer findings that are not tied one-to-one to a file.
+- Redaction hooks remove common password, token, API key, access key, secret, and bearer-token values before evidence can be emitted to reports.

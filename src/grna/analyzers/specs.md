@@ -26,7 +26,7 @@ Convert repository files, documentation, configuration, tests, coverage, and Git
 
 ## Expected Analyzer Types
 
-- Inventory analyzer.
+- Inventory analyzer implemented in `inventory.py`.
 - Technology analyzer.
 - Intent analyzer.
 - Feature analyzer.
@@ -46,3 +46,12 @@ Convert repository files, documentation, configuration, tests, coverage, and Git
 - Unsupported languages or missing evidence must produce gaps, not fabricated conclusions.
 - Analyzer failures should be isolated when possible so the job can continue with partial results.
 
+## Implemented Inventory Analyzer Contract
+
+- Input: a resolved repository directory path.
+- Output: `RepositoryInventory` containing deterministic `InventoryFile` records sorted by repository-relative path.
+- Skips: `.git`, virtual environments, dependency folders, cache folders, and generated build outputs.
+- Categories: `source`, `test`, `docs`, `config`, `ci`, `deployment`, `coverage`, `binary`, and `other`.
+- Important file detection includes README, SPEC, HLD, LLD, Dockerfile, Helm chart/value files, Kubernetes/deployment manifests, and coverage reports.
+- Summary fields include total file count, total size, per-category counts, skipped directories, and important file paths.
+- The analyzer computes SHA-256 checksums for included files and never imports or executes scanned repository code.

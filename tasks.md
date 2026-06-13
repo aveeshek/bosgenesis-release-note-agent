@@ -111,82 +111,82 @@
 
 **Requirement mapping:** FR-001, FR-002, NFR-002  
 **Type:** Repository Fetching  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Validate supported GitHub URL formats.
-- [ ] Reject local paths and unsupported schemes.
-- [ ] Normalize owner/repo identity.
-- [ ] Redact credentials if present.
-- [ ] Add unit tests for valid and invalid URLs.
+- [x] Validate supported GitHub URL formats.
+- [x] Reject local paths and unsupported schemes.
+- [x] Normalize owner/repo identity.
+- [x] Redact credentials if present.
+- [x] Add unit tests for valid and invalid URLs.
 
 ### Acceptance Criteria
 
-- [ ] Valid public GitHub URLs are accepted.
-- [ ] Invalid URLs return stable validation errors.
-- [ ] Local filesystem paths are rejected.
+- [x] Valid public GitHub URLs are accepted.
+- [x] Invalid URLs return stable validation errors.
+- [x] Local filesystem paths are rejected.
 
 ## Task T-007 - Implement Repository Fetcher
 
 **Requirement mapping:** FR-002, NFR-002  
 **Type:** Repository Fetching  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Clone public repository into job workspace.
-- [ ] Resolve branch, tag, or commit SHA.
-- [ ] Capture resolved commit SHA and default branch.
-- [ ] Enforce workspace isolation.
-- [ ] Skip execution of repository code and hooks.
-- [ ] Add integration test with a small public repo or local fixture.
+- [x] Clone public repository into job workspace.
+- [x] Resolve branch, tag, or commit SHA.
+- [x] Capture resolved commit SHA and default branch.
+- [x] Enforce workspace isolation.
+- [x] Skip execution of repository code and hooks.
+- [x] Add integration test with a small public repo or local fixture.
 
 ### Acceptance Criteria
 
-- [ ] Repository content exists under job-specific workspace.
-- [ ] Fetch metadata is recorded.
-- [ ] Fetch failures produce structured errors.
+- [x] Repository content exists under job-specific workspace.
+- [x] Fetch metadata is recorded.
+- [x] Fetch failures produce structured errors.
 
 ## Task T-008 - Implement Repository Inventory Analyzer
 
 **Requirement mapping:** FR-003, FR-007, FR-011  
 **Type:** Analyzer  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Walk repository tree.
-- [ ] Skip `.git`, virtual environments, `node_modules`, build outputs, and caches.
-- [ ] Classify source, test, docs, config, CI, deployment, coverage, and binary files.
-- [ ] Produce file counts and size summary.
-- [ ] Add fixture-based tests.
+- [x] Walk repository tree.
+- [x] Skip `.git`, virtual environments, `node_modules`, build outputs, and caches.
+- [x] Classify source, test, docs, config, CI, deployment, coverage, and binary files.
+- [x] Produce file counts and size summary.
+- [x] Add fixture-based tests.
 
 ### Acceptance Criteria
 
-- [ ] Inventory is deterministic.
-- [ ] Important files such as README, SPEC, HLD, LLD, Dockerfile, Helm, and coverage reports are detected.
-- [ ] Large/generated folders are skipped.
+- [x] Inventory is deterministic.
+- [x] Important files such as README, SPEC, HLD, LLD, Dockerfile, Helm, and coverage reports are detected.
+- [x] Large/generated folders are skipped.
 
 ## Task T-009 - Implement Evidence Indexer
 
 **Requirement mapping:** FR-011, NFR-005  
 **Type:** Evidence  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Create evidence IDs for important files and facts.
-- [ ] Store source path, source type, hash, and summary.
-- [ ] Add redaction hooks for sensitive values.
-- [ ] Link analyzer findings to evidence.
-- [ ] Add unit tests for deterministic IDs and redaction.
+- [x] Create evidence IDs for important files and facts.
+- [x] Store source path, source type, hash, and summary.
+- [x] Add redaction hooks for sensitive values.
+- [x] Link analyzer findings to evidence.
+- [x] Add unit tests for deterministic IDs and redaction.
 
 ### Acceptance Criteria
 
-- [ ] Evidence records are generated for repository files and commits.
-- [ ] Evidence can be looked up by ID.
-- [ ] Sensitive values are not emitted to report-ready evidence.
+- [x] Evidence records are generated for repository files and commits.
+- [x] Evidence can be looked up by ID.
+- [x] Sensitive values are not emitted to report-ready evidence.
 
 ## Task T-010 - Implement Technology Analyzer
 

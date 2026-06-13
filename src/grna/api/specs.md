@@ -16,6 +16,7 @@ Expose the release-note agent through a REST API suitable for UI clients, automa
 
 - HTTP requests for scan creation, job status, analytics, artifact listing, and artifact download.
 - JSON payloads containing repository URL, refs, release name, output formats, and analysis depth.
+- Repository validation and fetch errors from the GitHub module.
 - Application dependencies such as job orchestrator, storage adapters, and configuration.
 - Job state transition requests from future worker or operator paths.
 
@@ -44,3 +45,4 @@ Expose the release-note agent through a REST API suitable for UI clients, automa
 - Errors must include `error_code`, `message`, optional `details`, and `retryable`.
 - Artifact downloads must be constrained to the configured artifact root.
 - API routes that mutate job state must use the shared `JobOrchestrator`.
+- API scan creation must validate GitHub URLs before enqueueing fetch work.

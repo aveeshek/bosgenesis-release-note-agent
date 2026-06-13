@@ -17,6 +17,7 @@ Expose the agent as an MCP-compatible tool server so Codex, Kiro, Claude Code, B
 - MCP tool calls with JSON arguments.
 - Repository scan parameters such as `repo_url`, `branch`, `tag`, `commit_sha`, `release_name`, `analysis_depth`, and `output_formats`.
 - Job and artifact lookup arguments.
+- Stable GitHub URL validation errors when repository inputs are unsafe.
 
 ## Outputs
 
@@ -45,3 +46,4 @@ Expose the agent as an MCP-compatible tool server so Codex, Kiro, Claude Code, B
 - Tool responses must not leak local secrets or unrestricted paths.
 - Long-running work must be represented as async jobs.
 - Invalid job state transitions must return stable structured errors.
+- MCP scan tools must use the same GitHub URL validation path as REST and CLI.

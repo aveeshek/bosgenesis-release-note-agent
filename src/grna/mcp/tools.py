@@ -7,6 +7,7 @@ from uuid import uuid4
 from pydantic import ValidationError
 
 from grna.config import AppConfig, get_config
+from grna.github import GitHubUrlValidationError, validate_github_url
 from grna.jobs import InvalidJobTransitionError, JobOrchestrator
 from grna.storage import ArtifactStore, JobNotFoundError, JobStore
 from grna.storage.local import LocalArtifactStore, LocalJsonJobStore
@@ -92,11 +93,15 @@ class ReleaseNoteMcpTools:
         """Create a queued scan job without performing the long-running scan inline."""
 
         request = ScanStartRequest.model_validate(arguments)
+        repository = validate_github_url(request.repo_url)
+        payload = request.model_dump(mode="json")
+        payload["repo_url"] = repository.normalized_url
+        payload["github_repository"] = repository.to_dict()
         job_id = f"scan_{uuid4().hex}"
         job = self.orchestrator.create_job(
-            repo_url=request.repo_url,
+            repo_url=repository.normalized_url,
             job_id=job_id,
-            payload=request.model_dump(mode="json"),
+            payload=payload,
         )
         return {
             "job_id": job.job_id,
@@ -360,6 +365,13 @@ def error_payload(exc: Exception) -> dict:
         return {
             "error_code": "INVALID_JOB_TRANSITION",
             "message": str(exc),
+            "retryable": False,
+        }
+    if isinstance(exc, GitHubUrlValidationError):
+        return {
+            "error_code": exc.error_code,
+            "message": exc.message,
+            "redacted_url": exc.redacted_url,
             "retryable": False,
         }
     return {"error_code": "MCP_TOOL_ERROR", "message": str(exc), "retryable": False}

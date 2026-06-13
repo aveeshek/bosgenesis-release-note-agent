@@ -8,6 +8,6 @@ __pycache__
 data/jobs/*.json
 data/artifacts/**
 data/logs/**
+data/workspaces/**
 *.tar
 knowldege-base
-
