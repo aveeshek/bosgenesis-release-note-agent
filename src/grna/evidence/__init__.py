@@ -1,9 +1,13 @@
 """Evidence and traceability package."""
 
+from grna.evidence.aggregator import AnalyticsAggregator, AnalyticsBundle, AnalyticsSection
 from grna.evidence.indexer import EvidenceIndexer, make_evidence_id, redact_sensitive_text
 from grna.evidence.models import EvidenceIndex, EvidenceRecord
 
 __all__ = [
+    "AnalyticsAggregator",
+    "AnalyticsBundle",
+    "AnalyticsSection",
     "EvidenceIndex",
     "EvidenceIndexer",
     "EvidenceRecord",

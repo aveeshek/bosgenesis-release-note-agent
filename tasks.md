@@ -192,184 +192,184 @@
 
 **Requirement mapping:** FR-003  
 **Type:** Analyzer  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Detect languages from file extensions.
-- [ ] Detect Python packaging from `pyproject.toml` and `requirements.txt`.
-- [ ] Detect FastAPI, MCP, Pydantic, pytest, Ruff, Docker, Helm, Kubernetes, and GitHub Actions.
-- [ ] Assign confidence and evidence references.
-- [ ] Add unit tests with fixture manifests.
+- [x] Detect languages from file extensions.
+- [x] Detect Python packaging from `pyproject.toml` and `requirements.txt`.
+- [x] Detect FastAPI, MCP, Pydantic, pytest, Ruff, Docker, Helm, Kubernetes, and GitHub Actions.
+- [x] Assign confidence and evidence references.
+- [x] Add unit tests with fixture manifests.
 
 ### Acceptance Criteria
 
-- [ ] Technology inventory includes evidence paths.
-- [ ] Unknown technologies are reported as unknown.
-- [ ] Confidence is present for each finding.
+- [x] Technology inventory includes evidence paths.
+- [x] Unknown technologies are reported as unknown.
+- [x] Confidence is present for each finding.
 
 ## Task T-011 - Implement Spec and Documentation Analyzer
 
 **Requirement mapping:** FR-004, FR-011  
 **Type:** Analyzer  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Detect README, SPEC, HLD, LLD, docs, ADRs, and module-level specs.
-- [ ] Extract headings and concise summaries.
-- [ ] Identify project intent from documentation.
-- [ ] Record documentation gaps.
-- [ ] Add tests with fixture docs.
+- [x] Detect README, SPEC, HLD, LLD, docs, ADRs, and module-level specs.
+- [x] Extract headings and concise summaries.
+- [x] Identify project intent from documentation.
+- [x] Record documentation gaps.
+- [x] Add tests with fixture docs.
 
 ### Acceptance Criteria
 
-- [ ] Documentation inventory is produced.
-- [ ] Project intent distinguishes stated and inferred evidence.
-- [ ] Missing specs are listed as gaps.
+- [x] Documentation inventory is produced.
+- [x] Project intent distinguishes stated and inferred evidence.
+- [x] Missing specs are listed as gaps.
 
 ## Task T-012 - Implement Commit Analyzer
 
 **Requirement mapping:** FR-008  
 **Type:** Analyzer  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Read commit history from selected range.
-- [ ] Collect authors, dates, changed files, and tags.
-- [ ] Categorize conventional commits and heuristic categories.
-- [ ] Identify hotspots and risky changed areas.
-- [ ] Add tests against fixture Git repository.
+- [x] Read commit history from selected range.
+- [x] Collect authors, dates, changed files, and tags.
+- [x] Categorize conventional commits and heuristic categories.
+- [x] Identify hotspots and risky changed areas.
+- [x] Add tests against fixture Git repository.
 
 ### Acceptance Criteria
 
-- [ ] Commit count, authors, date range, and changed files are reported.
-- [ ] Uncategorized commits remain explicit.
-- [ ] Analyzer does not fabricate change categories.
+- [x] Commit count, authors, date range, and changed files are reported.
+- [x] Uncategorized commits remain explicit.
+- [x] Analyzer does not fabricate change categories.
 
 ## Task T-013 - Implement Code Structure Analyzer
 
 **Requirement mapping:** FR-007  
 **Type:** Analyzer  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Build directory and module summary.
-- [ ] Parse Python files with `ast`.
-- [ ] Identify entrypoints, classes, functions, imports, and public surfaces.
-- [ ] Estimate lines of code by module.
-- [ ] Add tests with Python fixture modules.
+- [x] Build directory and module summary.
+- [x] Parse Python files with `ast`.
+- [x] Identify entrypoints, classes, functions, imports, and public surfaces.
+- [x] Estimate lines of code by module.
+- [x] Add tests with Python fixture modules.
 
 ### Acceptance Criteria
 
-- [ ] Module inventory is generated.
-- [ ] Entrypoints are identified when evidence exists.
-- [ ] Unsupported languages produce partial-analysis gaps.
+- [x] Module inventory is generated.
+- [x] Entrypoints are identified when evidence exists.
+- [x] Unsupported languages produce partial-analysis gaps.
 
 ## Task T-014 - Implement Interface Analyzer
 
 **Requirement mapping:** FR-006  
 **Type:** Analyzer  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Detect FastAPI route decorators.
-- [ ] Detect CLI command patterns.
-- [ ] Detect MCP tool definitions.
-- [ ] Detect environment variables and config files.
-- [ ] Detect generated artifact paths.
-- [ ] Add tests for route and CLI fixtures.
+- [x] Detect FastAPI route decorators.
+- [x] Detect CLI command patterns.
+- [x] Detect MCP tool definitions.
+- [x] Detect environment variables and config files.
+- [x] Detect generated artifact paths.
+- [x] Add tests for route and CLI fixtures.
 
 ### Acceptance Criteria
 
-- [ ] Interface inventory includes type, direction, evidence, and confidence.
-- [ ] Missing explicit contracts are listed as recommendations.
-- [ ] Analyzer remains read-only.
+- [x] Interface inventory includes type, direction, evidence, and confidence.
+- [x] Missing explicit contracts are listed as recommendations.
+- [x] Analyzer remains read-only.
 
 ## Task T-015 - Implement Test and Coverage Analyzers
 
 **Requirement mapping:** FR-009, FR-010  
 **Type:** Analyzer  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Detect test source files.
-- [ ] Detect pytest/JUnit test reports.
-- [ ] Parse `coverage.xml`.
-- [ ] Parse `lcov.info`.
-- [ ] Parse JaCoCo XML where practical.
-- [ ] Report unavailable evidence clearly.
+- [x] Detect test source files.
+- [x] Detect pytest/JUnit test reports.
+- [x] Parse `coverage.xml`.
+- [x] Parse `lcov.info`.
+- [x] Parse JaCoCo XML where practical.
+- [x] Report unavailable evidence clearly.
 
 ### Acceptance Criteria
 
-- [ ] Test file inventory is produced.
-- [ ] Coverage is reported only when evidence exists.
-- [ ] Missing test/coverage evidence is explicit.
+- [x] Test file inventory is produced.
+- [x] Coverage is reported only when evidence exists.
+- [x] Missing test/coverage evidence is explicit.
 
 ## Task T-016 - Implement Analytics Aggregator
 
 **Requirement mapping:** FR-013, NFR-005  
 **Type:** Evidence  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Combine analyzer outputs into analytics bundle.
-- [ ] Normalize warnings and known gaps.
-- [ ] Attach evidence references.
-- [ ] Add JSON serialization.
-- [ ] Add unit tests.
+- [x] Combine analyzer outputs into analytics bundle.
+- [x] Normalize warnings and known gaps.
+- [x] Attach evidence references.
+- [x] Add JSON serialization.
+- [x] Add unit tests.
 
 ### Acceptance Criteria
 
-- [ ] A single analytics JSON object can drive report generation.
-- [ ] All major sections have evidence or explicit gaps.
+- [x] A single analytics JSON object can drive report generation.
+- [x] All major sections have evidence or explicit gaps.
 
 ## Task T-017 - Implement Mermaid Diagram Generator
 
 **Requirement mapping:** FR-012  
 **Type:** Report Generation  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Generate repository analysis flow diagram.
-- [ ] Generate C4 context diagram.
-- [ ] Generate C4 container diagram.
-- [ ] Generate component diagram.
-- [ ] Generate deployment topology when evidence exists.
-- [ ] Add snapshot tests for Mermaid output.
+- [x] Generate repository analysis flow diagram.
+- [x] Generate C4 context diagram.
+- [x] Generate C4 container diagram.
+- [x] Generate component diagram.
+- [x] Generate deployment topology when evidence exists.
+- [x] Add snapshot tests for Mermaid output.
 
 ### Acceptance Criteria
 
-- [ ] Diagram source is valid Mermaid-compatible text.
-- [ ] Diagrams include captions and confidence.
-- [ ] Missing evidence is handled gracefully.
+- [x] Diagram source is valid Mermaid-compatible text.
+- [x] Diagrams include captions and confidence.
+- [x] Missing evidence is handled gracefully.
 
 ## Task T-018 - Implement Markdown Release Note Generator
 
 **Requirement mapping:** FR-013  
 **Type:** Report Generation  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Create report content model.
-- [ ] Create Markdown template.
-- [ ] Render required sections.
-- [ ] Include Mermaid diagram blocks.
-- [ ] Include evidence appendix.
-- [ ] Add golden-file tests.
+- [x] Create report content model.
+- [x] Create Markdown template.
+- [x] Render required sections.
+- [x] Include Mermaid diagram blocks.
+- [x] Include evidence appendix.
+- [x] Add golden-file tests.
 
 ### Acceptance Criteria
 
-- [ ] Markdown report is generated for successful scan.
-- [ ] Required sections are present.
-- [ ] Missing evidence statements are present.
+- [x] Markdown report is generated for successful scan.
+- [x] Required sections are present.
+- [x] Missing evidence statements are present.
 
 ## Task T-019 - Implement HTML Report Theme
 

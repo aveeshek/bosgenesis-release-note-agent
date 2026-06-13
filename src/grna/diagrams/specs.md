@@ -44,3 +44,11 @@ Generate editable architecture and analytics diagrams from normalized evidence a
 - Diagram generation failure must not block Markdown report generation.
 - Do not create diagrams that imply unsupported architecture certainty.
 
+## Implemented Mermaid Generator Contract
+
+- `MermaidDiagram` stores diagram ID, type, title, caption, Mermaid source, confidence, evidence IDs, and gaps.
+- `MermaidDiagramSet` stores generated diagrams and diagram-level gaps.
+- `MermaidDiagramGenerator` generates repository analysis flow, C4 context, C4 container, component, and deployment topology diagrams.
+- Deployment topology is generated only when Docker, Helm, Kubernetes, or GitHub Actions evidence exists.
+- Missing deployment evidence produces an explicit gap instead of an invented topology.
+- Diagram source uses Mermaid `flowchart` syntax and is safe to embed in Markdown code fences.

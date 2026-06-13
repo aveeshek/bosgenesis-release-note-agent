@@ -38,6 +38,14 @@ The package must implement an evidence-first system: repository facts are collec
 - Clone repositories into job-specific isolated workspaces.
 - Keep analyzers modular and independently testable.
 - Inventory analysis must be deterministic and must skip generated, dependency, and cache folders.
+- Technology analysis must include confidence and evidence references for each finding.
+- Documentation analysis must distinguish stated project intent from inferred intent and explicit gaps.
+- Commit analysis must keep uncategorized commits explicit and avoid fabricated categories.
+- Code and interface analysis must remain read-only and report partial-analysis gaps.
+- Test and coverage analysis must report coverage only when report evidence exists.
+- Analytics aggregation must produce one JSON-ready bundle with normalized gaps and evidence references.
+- Diagram generation must include captions, confidence, and explicit gaps for missing evidence.
+- Markdown report generation must preserve required sections, Mermaid diagrams, and evidence traceability.
 - Evidence indexing must attach stable IDs and redact sensitive values before report generation.
 - Use structured models for contracts crossing module boundaries.
 - Keep REST, MCP, and CLI as adapters over the same service layer.

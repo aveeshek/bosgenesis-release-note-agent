@@ -27,15 +27,14 @@ Convert repository files, documentation, configuration, tests, coverage, and Git
 ## Expected Analyzer Types
 
 - Inventory analyzer implemented in `inventory.py`.
-- Technology analyzer.
+- Technology analyzer implemented in `technology.py`.
 - Intent analyzer.
 - Feature analyzer.
-- Interface analyzer.
-- Code analyzer.
-- Test analyzer.
-- Coverage analyzer.
-- Commit analyzer.
-- Spec analyzer.
+- Interface analyzer implemented in `interfaces.py`.
+- Code analyzer implemented in `code_structure.py`.
+- Test and coverage analyzer implemented in `test_coverage.py`.
+- Commit analyzer implemented in `commits.py`.
+- Spec and documentation analyzer implemented in `documentation.py`.
 - Dependency analyzer.
 
 ## Design Rules
@@ -55,3 +54,60 @@ Convert repository files, documentation, configuration, tests, coverage, and Git
 - Important file detection includes README, SPEC, HLD, LLD, Dockerfile, Helm chart/value files, Kubernetes/deployment manifests, and coverage reports.
 - Summary fields include total file count, total size, per-category counts, skipped directories, and important file paths.
 - The analyzer computes SHA-256 checksums for included files and never imports or executes scanned repository code.
+
+## Implemented Technology Analyzer Contract
+
+- Input: a resolved repository directory path plus `RepositoryInventory`.
+- Output: `TechnologyInventory` with findings, unknowns, and per-language file counts.
+- Language detection is extension-based and produces file-count details.
+- Python packaging detection reads `pyproject.toml` and `requirements.txt`.
+- Tool/framework detection covers FastAPI, MCP, Pydantic, pytest, Ruff, Docker, Helm, Kubernetes, and GitHub Actions.
+- Each `TechnologyFinding` includes category, confidence, evidence paths, and available evidence IDs.
+- Repositories with no recognized source extensions emit an explicit `Unknown language` finding instead of silently omitting language data.
+
+## Implemented Documentation Analyzer Contract
+
+- Input: a resolved repository directory path plus `RepositoryInventory`.
+- Output: `DocumentationInventory` with detected documents, project intent, and documentation gaps.
+- Detects README, SPEC, HLD, LLD, docs folder files, ADRs, and module-level `specs.md`.
+- Extracts Markdown and simple RST headings in source order.
+- Summaries come from the first meaningful prose paragraph and are kept concise.
+- Project intent is marked `stated` when sourced from README/SPEC prose, `inferred` when only titles are available, and `unavailable` when no readable documentation exists.
+- Missing README, SPEC, HLD, LLD, ADR, and module-level specs are reported as explicit gaps.
+
+## Implemented Commit Analyzer Contract
+
+- Input: a Git repository path plus optional `from_ref`, `to_ref`, and max commit count.
+- Output: `CommitAnalysis` with commit records, authors, date range, changed files, category counts, hotspots, and risky areas.
+- Reads commit history with Git CLI only; it does not execute repository code.
+- Captures SHA, author, author email, authored timestamp, subject, changed files, and tags pointing at each commit.
+- Categorizes conventional commits and limited keyword heuristics; uncategorized commits remain explicitly `uncategorized`.
+- Hotspots and risky areas are derived from changed-file frequency and high-sensitivity paths such as config, deployment, CI, and source directories.
+
+## Implemented Code Structure Analyzer Contract
+
+- Input: a resolved repository directory path plus `RepositoryInventory`.
+- Output: `CodeStructureAnalysis` with Python module summaries, directory summaries, entrypoints, and partial-analysis gaps.
+- Parses Python files using `ast` and never imports scanned modules.
+- Extracts module name, lines of code, classes, functions, imports, public surfaces, and entrypoint markers.
+- Detects Python `__main__`, FastAPI app assignment, and common CLI decorator entrypoints when evidence exists.
+- Unsupported source extensions are reported as explicit gaps instead of blocking Python analysis.
+
+## Implemented Interface Analyzer Contract
+
+- Input: a resolved repository directory path plus `RepositoryInventory`.
+- Output: `InterfaceAnalysis` with interface findings and recommendations.
+- Detects FastAPI-style route decorators, CLI command decorators, MCP tool decorators, environment-variable reads, config files, and generated artifact/report path literals.
+- Each finding includes interface type, direction, evidence path, confidence, and available evidence ID.
+- Missing explicit route, CLI, MCP, or environment contracts are reported as recommendations.
+- The analyzer remains read-only and uses AST/string scanning only.
+
+## Implemented Test and Coverage Analyzer Contract
+
+- Input: a resolved repository directory path plus `RepositoryInventory`.
+- Output: `TestCoverageAnalysis` with test source files, parsed test reports, parsed coverage reports, and explicit gaps.
+- Detects test source files from the inventory's `test` category.
+- Parses pytest/JUnit-style XML test reports when report files exist.
+- Parses `coverage.xml`/Cobertura-style XML, `lcov.info`, and JaCoCo XML where practical.
+- Coverage is reported only from report evidence; the analyzer does not infer coverage from test source presence.
+- Missing test source, test report, and coverage report evidence are listed as explicit gaps.

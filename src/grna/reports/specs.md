@@ -56,3 +56,11 @@ Generate professional release-note artifacts from the normalized evidence and an
 - Markdown output should always be generated for successful scans.
 - PDF failure should preserve Markdown and HTML artifacts when possible.
 
+## Implemented Markdown Renderer Contract
+
+- `ReleaseNoteContent` stores title, release name, repository, generated timestamp, analytics bundle, diagram set, and optional evidence index.
+- `MarkdownReleaseNoteRenderer` renders the first Markdown report artifact.
+- Required sections include document control, executive summary, repository overview, project intent, technology inventory, architecture, interfaces, code, tests, coverage, commits, risks, gaps, evidence traceability, and appendix.
+- Mermaid diagrams are embedded as fenced `mermaid` code blocks with captions and confidence values.
+- Evidence appendix lists available evidence IDs with source path and summary when an evidence index is provided.
+- Missing analytics, coverage, diagram, or evidence data renders as explicit "not available" or missing evidence statements.

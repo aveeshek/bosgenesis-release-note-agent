@@ -29,6 +29,15 @@ Validate that the agent safely scans public repositories, builds evidence-backed
 - Job state transitions.
 - Repository inventory classification, important file detection, and generated-folder skip rules.
 - Analyzer contracts and evidence references.
+- Technology detection from extensions, Python manifests, deployment assets, CI files, and unknown-language repositories.
+- Documentation detection for README, SPEC, HLD, LLD, docs, ADRs, module specs, intent extraction, and gaps.
+- Commit history analysis with fixture Git repositories, selected ranges, tags, authors, changed files, categories, and hotspots.
+- Python code structure analysis with AST fixtures, entrypoints, public surfaces, LOC, and unsupported-language gaps.
+- Interface analysis for FastAPI routes, CLI commands, MCP tools, environment variables, config files, artifacts, and recommendations.
+- Test and coverage report parsing for source files, pytest/JUnit XML, coverage.xml, lcov.info, JaCoCo XML, and missing evidence.
+- Analytics aggregation for section normalization, JSON serialization, gaps, warnings, and evidence ID collection.
+- Mermaid diagram snapshot tests for repository flow, C4-style diagrams, deployment topology, metadata, and missing evidence.
+- Markdown report golden-style tests for required sections, Mermaid fences, missing evidence statements, and evidence appendix.
 - Deterministic evidence IDs, evidence lookup, commit/fact records, and redaction.
 - Technology, code, interface, test, coverage, commit, and spec analyzers.
 - Diagram generation.

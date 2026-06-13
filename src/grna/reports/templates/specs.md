@@ -23,7 +23,7 @@ Store template assets used by the report generation module.
 
 ## Expected Templates
 
-- Release note Markdown template.
+- Release note Markdown template implemented in code by `MarkdownReleaseNoteRenderer` until external templates are introduced.
 - Release note HTML template.
 - Executive summary template.
 - Evidence appendix template.
@@ -37,4 +37,3 @@ Store template assets used by the report generation module.
 - Unknown or missing values must render as clear `Not available` messages.
 - HTML templates must be suitable for PDF conversion.
 - Keep generated reports professional, compact, and readable.
-

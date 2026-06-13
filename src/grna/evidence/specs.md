@@ -55,3 +55,12 @@ Provide the normalized evidence model that connects repository facts to generate
 - Commit evidence is supported from commit SHA and summary metadata.
 - Fact evidence is supported for analyzer findings that are not tied one-to-one to a file.
 - Redaction hooks remove common password, token, API key, access key, secret, and bearer-token values before evidence can be emitted to reports.
+
+## Implemented Analytics Aggregator Contract
+
+- `AnalyticsSection` stores a normalized analyzer section name, JSON-ready data, gaps, warnings, and evidence IDs.
+- `AnalyticsBundle` stores job ID, generated timestamp, sections, normalized global gaps, warnings, and evidence IDs.
+- `AnalyticsAggregator` accepts analyzer outputs that expose `to_dict()` or are already dictionaries.
+- Missing analyzer outputs are represented as empty sections with explicit gaps.
+- Evidence IDs are recursively collected from analyzer output and can be filtered through `EvidenceIndex`.
+- `AnalyticsBundle.to_dict()` returns a single JSON-compatible object intended to drive report generation.
