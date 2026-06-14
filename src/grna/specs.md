@@ -46,6 +46,8 @@ The package must implement an evidence-first system: repository facts are collec
 - Analytics aggregation must produce one JSON-ready bundle with normalized gaps and evidence references.
 - Diagram generation must include captions, confidence, and explicit gaps for missing evidence.
 - Markdown report generation must preserve required sections, Mermaid diagrams, and evidence traceability.
+- HTML report generation must use configurable BOS Genesis theme tokens and remain self-contained for offline viewing and PDF conversion.
+- PDF report generation must preserve report identity, page numbers, compact tables, diagrams/source, and return structured fallback metadata on render failure.
 - Evidence indexing must attach stable IDs and redact sensitive values before report generation.
 - Use structured models for contracts crossing module boundaries.
 - Keep REST, MCP, and CLI as adapters over the same service layer.

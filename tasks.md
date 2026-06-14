@@ -375,64 +375,64 @@
 
 **Requirement mapping:** FR-013, `docs/report-style-spec.md`  
 **Type:** Report Generation  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Create HTML template.
-- [ ] Implement theme tokens.
-- [ ] Implement cover/dashboard layout.
-- [ ] Implement page-like sections for print.
-- [ ] Implement tables, metric tiles, callouts, and evidence blocks.
-- [ ] Add visual smoke test.
+- [x] Create HTML template.
+- [x] Implement theme tokens.
+- [x] Implement cover/dashboard layout.
+- [x] Implement page-like sections for print.
+- [x] Implement tables, metric tiles, callouts, and evidence blocks.
+- [x] Add visual smoke test.
 
 ### Acceptance Criteria
 
-- [ ] HTML follows `docs/report-style-spec.md`.
-- [ ] HTML is readable without external network assets.
-- [ ] HTML can be used as PDF source.
+- [x] HTML follows `docs/report-style-spec.md`.
+- [x] HTML is readable without external network assets.
+- [x] HTML can be used as PDF source.
 
 ## Task T-020 - Implement PDF Renderer
 
 **Requirement mapping:** FR-013, `docs/report-style-spec.md`  
 **Type:** Report Generation  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Select initial PDF renderer.
-- [ ] Render HTML to PDF.
-- [ ] Preserve cover page, headers, page numbers, tables, and diagrams/source.
-- [ ] Add fallback behavior when PDF render fails.
-- [ ] Compare output against reference PDF style.
+- [x] Select initial PDF renderer.
+- [x] Render HTML to PDF.
+- [x] Preserve cover page, headers, page numbers, tables, and diagrams/source.
+- [x] Add fallback behavior when PDF render fails.
+- [x] Compare output against reference PDF style.
 
 ### Acceptance Criteria
 
-- [ ] PDF artifact is generated when requested.
-- [ ] Markdown and HTML are preserved if PDF generation fails.
-- [ ] PDF visual style is recognizably aligned with the reference sample.
+- [x] PDF artifact is generated when requested.
+- [x] Markdown and HTML are preserved if PDF generation fails.
+- [x] PDF visual style is recognizably aligned with the reference sample.
 
 ## Task T-021 - Implement REST API MVP
 
 **Requirement mapping:** FR-014  
 **Type:** API  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Add FastAPI app factory.
-- [ ] Add health and readiness endpoints.
-- [ ] Add scan creation endpoint.
-- [ ] Add job status endpoint.
-- [ ] Add analytics endpoint.
-- [ ] Add artifact listing and download endpoints.
-- [ ] Add API contract tests.
+- [x] Add FastAPI app factory.
+- [x] Add health and readiness endpoints.
+- [x] Add scan creation endpoint.
+- [x] Add job status endpoint.
+- [x] Add analytics endpoint.
+- [x] Add artifact listing and download endpoints.
+- [x] Add API contract tests.
 
 ### Acceptance Criteria
 
-- [ ] API starts locally.
-- [ ] Valid scan request creates a job.
-- [ ] Job status and artifacts can be queried.
+- [x] API starts locally.
+- [x] Valid scan request creates a job.
+- [x] Job status and artifacts can be queried.
 
 ## Task T-022 - Implement CLI MVP
 

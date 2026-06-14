@@ -38,6 +38,9 @@ Validate that the agent safely scans public repositories, builds evidence-backed
 - Analytics aggregation for section normalization, JSON serialization, gaps, warnings, and evidence ID collection.
 - Mermaid diagram snapshot tests for repository flow, C4-style diagrams, deployment topology, metadata, and missing evidence.
 - Markdown report golden-style tests for required sections, Mermaid fences, missing evidence statements, and evidence appendix.
+- HTML report smoke tests for inline theme tokens, cover/dashboard layout, print CSS, tables, callouts, Mermaid source, and evidence blocks.
+- PDF report tests for successful PDF bytes when the renderer is available and structured preservation metadata when rendering fails.
+- REST API contract tests for health/readiness, scan creation, job status, analytics placeholders, artifact metadata, artifact download, invalid URLs, and missing jobs.
 - Deterministic evidence IDs, evidence lookup, commit/fact records, and redaction.
 - Technology, code, interface, test, coverage, commit, and spec analyzers.
 - Diagram generation.

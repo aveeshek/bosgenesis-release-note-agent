@@ -35,7 +35,19 @@ Expose the release-note agent through a REST API suitable for UI clients, automa
 - `GET /api/v1/scans/{job_id}`
 - `GET /api/v1/scans/{job_id}/analytics`
 - `GET /api/v1/scans/{job_id}/artifacts`
-- `GET /api/v1/artifacts/{artifact_id}`
+- `GET /api/v1/scans/{job_id}/artifacts/{artifact_id}`
+- `GET /api/v1/scans/{job_id}/artifacts/{artifact_id}/download`
+
+## Implemented REST MVP Contract
+
+- `create_app()` builds the FastAPI application and accepts an optional `ReleaseNoteMcpTools` instance for tests and future dependency injection.
+- `POST /api/v1/scans` validates the public GitHub URL, creates a queued local job, and returns HTTP `202`.
+- `GET /api/v1/scans/{job_id}` returns persisted job status from the shared job store.
+- `GET /api/v1/scans/{job_id}/analytics` returns the current analytics contract, including explicit placeholder availability until the worker pipeline is wired.
+- `GET /api/v1/scans/{job_id}/artifacts` returns artifact metadata, optionally filtered by `artifact_type`.
+- `GET /api/v1/scans/{job_id}/artifacts/{artifact_id}` returns metadata for a single artifact.
+- `GET /api/v1/scans/{job_id}/artifacts/{artifact_id}/download` streams the artifact file only after verifying it remains under the job artifact root.
+- REST errors map shared MCP/job/storage validation failures to stable HTTP responses with structured `detail.error_code` payloads.
 
 ## Design Rules
 
@@ -46,3 +58,4 @@ Expose the release-note agent through a REST API suitable for UI clients, automa
 - Artifact downloads must be constrained to the configured artifact root.
 - API routes that mutate job state must use the shared `JobOrchestrator`.
 - API scan creation must validate GitHub URLs before enqueueing fetch work.
+- Artifact lookup and download routes should remain job-scoped so callers cannot enumerate unrelated job artifacts by opaque ID alone.
