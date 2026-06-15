@@ -1,3 +1,5 @@
+import json
+import urllib.error
 from types import SimpleNamespace
 
 from grna.analyzers.inventory import RepositoryInventoryAnalyzer
@@ -7,7 +9,11 @@ from grna.analyzers.readiness import (
     analyze_security_scan,
 )
 from grna.config import AppConfig
-from grna.llm.readiness_reasoning import build_readiness_reasoning
+from grna.llm.readiness_reasoning import (
+    READINESS_REASONING_SCHEMA,
+    OllamaHttpChatModel,
+    build_readiness_reasoning,
+)
 
 
 def test_documentation_coverage_counts_python_docstrings(tmp_path) -> None:
@@ -120,6 +126,23 @@ class _FakeModel:
         """
 
 
+class _RepairableFakeModel:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def invoke(self, prompt: str) -> str:
+        self.calls += 1
+        if self.calls == 1:
+            return "Here is the answer: not-json"
+        assert "previous readiness response was invalid JSON" in prompt
+        return (
+            '{"findings":[{"dimension":"Security scan","suggested_score":3.4,'
+            '"confidence":0.92,"rationale":"No high severity findings were present.",'
+            '"evidence_refs":[".github/workflows/test.yml","missing/path.py"]}],'
+            '"warnings":[]}'
+        )
+
+
 def test_readiness_reasoning_accepts_bounded_structured_gemma_output() -> None:
     result = build_readiness_reasoning(
         config=AppConfig(enable_llm_reasoning=True, llm_minimum_confidence=0.85),
@@ -130,3 +153,102 @@ def test_readiness_reasoning_accepts_bounded_structured_gemma_output() -> None:
     assert result.status == "generated"
     assert result.findings[0].dimension == "Documentation coverage"
     assert result.findings[0].suggested_score == 4.5
+
+
+def test_readiness_reasoning_repairs_invalid_json_and_filters_evidence_refs() -> None:
+    model = _RepairableFakeModel()
+
+    result = build_readiness_reasoning(
+        config=AppConfig(enable_llm_reasoning=True, llm_minimum_confidence=0.85),
+        deterministic_summary={
+            "security_scan": {
+                "evidence_paths": [".github/workflows/test.yml"],
+            }
+        },
+        model=model,
+    )
+
+    assert model.calls == 2
+    assert result.status == "generated"
+    assert result.warnings == ("llm_readiness_reasoning_repaired_structured_output",)
+    assert result.findings[0].dimension == "Security scan"
+    assert result.findings[0].evidence_refs == (".github/workflows/test.yml",)
+
+
+class _FakeHttpResponse:
+    def __init__(self, payload: dict) -> None:
+        self._payload = payload
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, traceback) -> None:
+        return None
+
+    def read(self) -> bytes:
+        return json.dumps(self._payload).encode("utf-8")
+
+
+def test_ollama_http_model_requests_schema_json_mode(monkeypatch) -> None:
+    captured: list[dict] = []
+
+    def fake_urlopen(request, timeout):
+        captured.append(json.loads(request.data.decode("utf-8")))
+        return _FakeHttpResponse(
+            {
+                "response": json.dumps(
+                    {
+                        "findings": [
+                            {
+                                "dimension": "Security scan",
+                                "suggested_score": 3.4,
+                                "confidence": 0.9,
+                                "rationale": "No high severity findings were detected.",
+                                "evidence_refs": ["security_scan"],
+                            }
+                        ],
+                        "warnings": [],
+                    }
+                )
+            }
+        )
+
+    monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
+
+    content = OllamaHttpChatModel(
+        model="gemma4:26b",
+        base_url="http://ollama:11434",
+    ).invoke("Return JSON")
+
+    assert json.loads(content)["findings"][0]["dimension"] == "Security scan"
+    assert captured[0]["format"] == READINESS_REASONING_SCHEMA
+    assert captured[0]["options"]["temperature"] == 0.2
+
+
+def test_ollama_http_model_falls_back_to_plain_json_mode_on_schema_rejection(
+    monkeypatch,
+) -> None:
+    formats: list[object] = []
+
+    def fake_urlopen(request, timeout):
+        payload = json.loads(request.data.decode("utf-8"))
+        formats.append(payload["format"])
+        if len(formats) == 1:
+            raise urllib.error.HTTPError(
+                url="http://ollama:11434/api/generate",
+                code=400,
+                msg="unsupported format schema",
+                hdrs=None,
+                fp=None,
+            )
+        return _FakeHttpResponse({"response": '{"findings":[],"warnings":[]}'})
+
+    monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
+
+    content = OllamaHttpChatModel(
+        model="gemma4:26b",
+        base_url="http://ollama:11434",
+    ).invoke("Return JSON")
+
+    assert json.loads(content) == {"findings": [], "warnings": []}
+    assert formats == [READINESS_REASONING_SCHEMA, "json"]
