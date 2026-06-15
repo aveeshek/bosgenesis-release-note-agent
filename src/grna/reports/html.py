@@ -1463,6 +1463,26 @@ def _short_date(value: str) -> str:
 
 
 def _readiness_scores(content: ReleaseNoteContent) -> list[tuple[str, float, str, str]]:
+    readiness = content.analytics.sections.get("readiness")
+    if readiness:
+        rows = []
+        for item in readiness.data.get("scores", []):
+            name = str(item.get("dimension", "Readiness"))
+            try:
+                score = float(item.get("score", 0.0))
+            except (TypeError, ValueError):
+                score = 0.0
+            rows.append(
+                (
+                    name,
+                    max(0.0, min(5.0, score)),
+                    str(item.get("evidence_interpretation", "Evidence summary unavailable.")),
+                    str(item.get("recommended_action", "Review repository evidence.")),
+                )
+            )
+        if rows:
+            return rows
+
     has_api = _primary_interface(content) != "Not available from repository evidence"
     has_docs = bool(content.analytics.sections.get("documentation", None))
     has_tests = bool(
@@ -1478,16 +1498,16 @@ def _readiness_scores(content: ReleaseNoteContent) -> list[tuple[str, float, str
             "Add formal OpenAPI examples and backward compatibility policy.",
         ),
         (
-            "Document generation",
-            3.8,
-            "Markdown/HTML/PDF report generation path is present in this agent flow.",
-            "Add golden sample artifact comparison tests.",
+            "Documentation coverage",
+            2.0,
+            "Source documentation coverage was not analyzed in this bundle.",
+            "Run the readiness analyzer to score docstrings or Javadoc-style comments.",
         ),
         (
-            "Safety / governance",
-            3.8,
-            "Repository analysis is read-only and does not execute scanned code.",
-            "Add policy-as-code tests for forbidden operations.",
+            "Security scan",
+            2.5,
+            "Lightweight security scan evidence was not analyzed in this bundle.",
+            "Run the readiness analyzer to detect secret patterns and risky operations.",
         ),
         (
             "Documentation",
@@ -1535,9 +1555,10 @@ def _readiness_scorecard(scores: list[tuple[str, float, str, str]]) -> str:
     ]
     aliases = {
         "API contract": "API",
-        "Document generation": "Docs",
-        "Safety / governance": "Safety",
+        "Documentation coverage": "Docs",
+        "Security scan": "Safety",
         "Documentation": "Reasoning",
+        "Repository documentation": "Reasoning",
         "Testing": "Memory",
         "Observability": "Observability",
         "Persistence": "Persistence",
@@ -1559,8 +1580,9 @@ def _readiness_scorecard(scores: list[tuple[str, float, str, str]]) -> str:
     return (
         '<div class="score-grid">'
         "<h3>Release Readiness Assessment (Analytical Estimate)</h3>"
-        '<p class="muted">Score based on public repo evidence: contracts, tags, '
-        "dependencies, docs, and implementation statements.</p>"
+        '<p class="muted">Score based on public repo evidence: contracts, source '
+        "documentation coverage, lightweight security scan findings, tests, "
+        "dependencies, and deployment files.</p>"
         + "".join(rows)
         + "</div>"
     )
@@ -1600,11 +1622,24 @@ def _capabilities(content: ReleaseNoteContent) -> list[tuple[str, str, str]]:
         ),
         (
             "Safety posture",
-            "Read-only repository evidence analysis.",
+            _safety_posture(content),
             "Strong fit for controlled enterprise automation and audit requirements.",
         ),
     ]
     return rows
+
+
+def _safety_posture(content: ReleaseNoteContent) -> str:
+    readiness = content.analytics.sections.get("readiness")
+    if not readiness:
+        return "Read-only repository evidence analysis."
+    scan = readiness.data.get("security_scan", {})
+    findings = scan.get("findings", [])
+    controls = scan.get("controls", [])
+    return (
+        f"Lightweight scan found {len(findings)} sanitized finding(s); "
+        f"controls: {', '.join(controls[:3]) if controls else 'none detected'}."
+    )
 
 
 def _interface_types(content: ReleaseNoteContent) -> set[str]:

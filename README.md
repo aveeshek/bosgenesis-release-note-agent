@@ -69,6 +69,39 @@ surface for curl smoke tests:
 - `POST /mcp/tools/get_release_note_artifact`
 - `POST /mcp/tools/get_release_note_artifacts`
 
+## Local Docker Runtime
+
+Docker Compose is intentionally not part of this project. The local container
+runtime is a single Docker image for the API process; Kubernetes/Helm remains
+the deployment path for multi-process environments.
+
+Build the image:
+
+```bash
+docker build -t bosgenesis-release-note-agent:local .
+```
+
+Run the API container with configurable local storage roots:
+
+```bash
+mkdir -p data/container-local/{workspaces,artifacts,jobs,logs}
+docker run --rm \
+  --name bosgenesis-release-note-agent-local \
+  -p 8080:8080 \
+  -v "$(pwd)/data/container-local:/data" \
+  -e GRNA_WORKSPACE_ROOT=/data/workspaces \
+  -e GRNA_ARTIFACT_ROOT=/data/artifacts \
+  -e GRNA_JOB_ROOT=/data/jobs \
+  -e GRNA_LOG_ROOT=/data/logs \
+  bosgenesis-release-note-agent:local
+```
+
+Smoke-test the local container:
+
+```bash
+./playbook/container-smoke-test.sh
+```
+
 ## Helm Deployment
 
 ```bash

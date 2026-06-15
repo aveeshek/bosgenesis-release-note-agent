@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from uuid import uuid4
+import json
+from concurrent.futures import Future, ThreadPoolExecutor
+from pathlib import Path
 
 from pydantic import ValidationError
 
 from grna.config import AppConfig, get_config
 from grna.github import GitHubUrlValidationError, validate_github_url
 from grna.jobs import InvalidJobTransitionError, JobOrchestrator
+from grna.logging_config import get_logger
+from grna.runtime import ScanPipelineRequest, run_end_to_end_scan
 from grna.storage import ArtifactStore, JobNotFoundError, JobStore
 from grna.storage.local import LocalArtifactStore, LocalJsonJobStore
 
@@ -24,6 +28,10 @@ from .schemas import (
 
 class ToolExecutionError(ValueError):
     """Raised when a tool cannot be executed."""
+
+
+LOGGER = get_logger(__name__)
+_BACKGROUND_EXECUTOR = ThreadPoolExecutor(max_workers=2, thread_name_prefix="grna-mcp-scan")
 
 
 def create_default_job_store(config: AppConfig | None = None) -> JobStore:
@@ -90,25 +98,27 @@ class ReleaseNoteMcpTools:
         return handler(arguments)
 
     def github_release_scan_start(self, arguments: dict) -> dict:
-        """Create a queued scan job without performing the long-running scan inline."""
+        """Run an end-to-end scan and return generated artifact metadata."""
 
         request = ScanStartRequest.model_validate(arguments)
         repository = validate_github_url(request.repo_url)
         payload = request.model_dump(mode="json")
         payload["repo_url"] = repository.normalized_url
         payload["github_repository"] = repository.to_dict()
-        job_id = f"scan_{uuid4().hex}"
-        job = self.orchestrator.create_job(
-            repo_url=repository.normalized_url,
-            job_id=job_id,
-            payload=payload,
+        return run_end_to_end_scan(
+            ScanPipelineRequest(
+                repo_url=repository.normalized_url,
+                branch=request.branch,
+                tag=request.tag,
+                commit_sha=request.commit_sha,
+                release_name=request.release_name,
+                output_formats=tuple(request.output_formats),
+                runtime="mcp",
+                payload_extra={"github_repository": repository.to_dict()},
+            ),
+            job_store=self.job_store,
+            artifact_store=self.artifact_store,
         )
-        return {
-            "job_id": job.job_id,
-            "status": job.status,
-            "stage": job.stage,
-            "message": "Scan job accepted. Repository analysis will run asynchronously.",
-        }
 
     def github_release_scan_status(self, arguments: dict) -> dict:
         """Return job status."""
@@ -117,31 +127,40 @@ class ReleaseNoteMcpTools:
         return self.job_store.get(request.job_id).to_dict()
 
     def github_release_get_analytics(self, arguments: dict) -> dict:
-        """Return analytics placeholder until analyzer pipeline is implemented."""
+        """Return generated analytics JSON for a completed scan."""
 
         request = JobLookupRequest.model_validate(arguments)
         job = self.job_store.get(request.job_id)
+        analytics = self._read_json_artifact(job.job_id, "analytics")
+        if analytics is None:
+            return {
+                "job_id": job.job_id,
+                "status": job.status,
+                "available": False,
+                "message": "Analytics artifact is not available for this job.",
+                "analytics": {},
+            }
         return {
             "job_id": job.job_id,
             "status": job.status,
-            "available": False,
-            "message": "Analytics generation is not implemented yet.",
-            "analytics": {},
+            "available": True,
+            "analytics": analytics,
         }
 
     def github_release_generate_note(self, arguments: dict) -> dict:
-        """Return report generation placeholder until report pipeline is implemented."""
+        """Return generated release-note artifacts for a completed scan."""
 
         request = JobLookupRequest.model_validate(arguments)
         job = self.job_store.get(request.job_id)
+        artifacts = [
+            artifact.to_dict()
+            for artifact in self.artifact_store.list_artifacts(job.job_id)
+        ]
         return {
             "job_id": job.job_id,
-            "available": False,
-            "message": "Release-note generation is not implemented yet.",
-            "artifacts": [
-                artifact.to_dict()
-                for artifact in self.artifact_store.list_artifacts(job.job_id)
-            ],
+            "status": job.status,
+            "available": bool(artifacts),
+            "artifacts": artifacts,
         }
 
     def github_release_get_artifact(self, arguments: dict) -> dict:
@@ -163,15 +182,22 @@ class ReleaseNoteMcpTools:
         }
 
     def github_release_list_evidence(self, arguments: dict) -> dict:
-        """Return evidence placeholder until evidence indexing is implemented."""
+        """Return generated evidence records for a completed scan."""
 
         request = JobLookupRequest.model_validate(arguments)
         job = self.job_store.get(request.job_id)
+        evidence = self._read_json_artifact(job.job_id, "evidence")
+        if evidence is None:
+            return {
+                "job_id": job.job_id,
+                "available": False,
+                "message": "Evidence artifact is not available for this job.",
+                "evidence": [],
+            }
         return {
             "job_id": job.job_id,
-            "available": False,
-            "message": "Evidence indexing is not implemented yet.",
-            "evidence": [],
+            "available": True,
+            "evidence": evidence.get("records", []),
         }
 
     def github_release_get_diagrams(self, arguments: dict) -> dict:
@@ -197,18 +223,21 @@ class ReleaseNoteMcpTools:
         output_formats = ["markdown", "html"]
         if request.include_pdf:
             output_formats.append("pdf")
-        return self.github_release_scan_start(
-            {
-                "repo_url": request.repo_url,
-                "branch": request.ref or request.to_ref,
-                "release_name": request.release_name,
+        repository = validate_github_url(request.repo_url)
+        return self._submit_background_scan(
+            repo_url=repository.normalized_url,
+            branch=request.ref or request.to_ref,
+            release_name=request.release_name,
+            output_formats=tuple(output_formats),
+            payload_extra={
+                "github_repository": repository.to_dict(),
                 "analysis_depth": request.analysis_depth,
-                "output_formats": output_formats,
                 "from_ref": request.from_ref,
                 "to_ref": request.to_ref,
                 "output_profile": request.output_profile,
                 "job_mode": "release_note",
-            }
+                "async_submission": True,
+            },
         )
 
     def github_release_note_get_job_status(self, arguments: dict) -> dict:
@@ -250,10 +279,11 @@ class ReleaseNoteMcpTools:
 
         result = self.github_release_list_evidence(arguments)
         result["evidence_model"] = {
-            "available": False,
+            "available": result["available"],
             "items": result.pop("evidence", []),
-            "message": "Evidence model generation is not implemented yet.",
         }
+        if "message" in result:
+            result["evidence_model"]["message"] = result.pop("message")
         return result
 
     def github_release_note_cancel_job(self, arguments: dict) -> dict:
@@ -308,16 +338,29 @@ class ReleaseNoteMcpTools:
         return self.github_release_scan_status(arguments)
 
     def get_repository_analysis_summary(self, arguments: dict) -> dict:
-        """Return a placeholder repository analysis summary."""
+        """Return current repository analysis summary."""
 
         request = JobLookupRequest.model_validate(arguments)
         job = self.job_store.get(request.job_id)
+        analytics = self._read_json_artifact(job.job_id, "analytics")
+        if analytics is None:
+            return {
+                "job_id": job.job_id,
+                "status": job.status,
+                "available": False,
+                "message": "Repository analysis summary is not available for this job.",
+                "summary": {},
+            }
         return {
             "job_id": job.job_id,
             "status": job.status,
-            "available": False,
-            "message": "Repository analysis summary is not implemented yet.",
-            "summary": {},
+            "available": True,
+            "summary": {
+                "sections": sorted(analytics.get("sections", {}).keys()),
+                "gaps": analytics.get("gaps", []),
+                "warnings": analytics.get("warnings", []),
+                "evidence_count": len(analytics.get("evidence_ids", [])),
+            },
         }
 
     def generate_release_note(self, arguments: dict) -> dict:
@@ -337,19 +380,101 @@ class ReleaseNoteMcpTools:
 
     def _submit_analyzer_only_job(self, arguments: dict, job_mode: str) -> dict:
         request = AnalyzerOnlyRequest.model_validate(arguments)
-        result = self.github_release_scan_start(
-            {
-                "repo_url": request.repo_url,
-                "branch": request.ref or request.to_ref,
+        repository = validate_github_url(request.repo_url)
+        result = self._submit_background_scan(
+            repo_url=repository.normalized_url,
+            branch=request.ref or request.to_ref,
+            release_name=None,
+            output_formats=("json",),
+            payload_extra={
+                "github_repository": repository.to_dict(),
                 "analysis_depth": request.analysis_depth,
-                "output_formats": ["json"],
                 "from_ref": request.from_ref,
                 "to_ref": request.to_ref,
                 "job_mode": job_mode,
-            }
+                "async_submission": True,
+            },
         )
         result["job_mode"] = job_mode
         return result
+
+    def _submit_background_scan(
+        self,
+        *,
+        repo_url: str,
+        branch: str | None,
+        release_name: str | None,
+        output_formats: tuple[str, ...],
+        payload_extra: dict,
+    ) -> dict:
+        job = self.orchestrator.create_job(
+            repo_url=repo_url,
+            payload={
+                "repo_url": repo_url,
+                "branch": branch,
+                "tag": None,
+                "commit_sha": None,
+                "release_name": release_name,
+                "output_formats": list(output_formats),
+                "runtime": "mcp_async",
+                **payload_extra,
+            },
+        )
+        pipeline_request = ScanPipelineRequest(
+            repo_url=repo_url,
+            branch=branch,
+            release_name=release_name,
+            output_formats=output_formats,
+            runtime="mcp_async",
+            payload_extra=payload_extra,
+            job_id=job.job_id,
+        )
+        future = _BACKGROUND_EXECUTOR.submit(
+            run_end_to_end_scan,
+            pipeline_request,
+            job_store=self.job_store,
+            artifact_store=self.artifact_store,
+        )
+        future.add_done_callback(lambda done: _log_background_completion(job.job_id, done))
+        return {
+            "job_id": job.job_id,
+            "status": job.status,
+            "stage": job.stage,
+            "progress_percent": job.progress_percent,
+            "repository": repo_url,
+            "accepted": True,
+            "async": True,
+            "message": "Scan accepted. Poll job status and artifacts with the returned job_id.",
+            "artifacts": [],
+        }
+
+    def _read_json_artifact(self, job_id: str, artifact_type: str) -> dict | None:
+        for artifact in self.artifact_store.list_artifacts(job_id):
+            if artifact.artifact_type != artifact_type:
+                continue
+            artifact_path = Path(artifact.path).resolve()
+            job_root = self.artifact_store.job_artifact_dir(job_id).resolve()
+            if not artifact_path.is_relative_to(job_root):
+                raise ToolExecutionError("artifact path is outside job artifact root")
+            if not artifact_path.exists():
+                return None
+            return json.loads(artifact_path.read_text(encoding="utf-8"))
+        return None
+
+
+def _log_background_completion(job_id: str, future: Future) -> None:
+    try:
+        future.result()
+    except Exception:  # pragma: no cover - job state carries failure details.
+        LOGGER.exception(
+            "mcp_background_scan_failed",
+            extra={"job_id": job_id, "event": "background_scan_failed", "status": "failed"},
+        )
+    else:
+        LOGGER.info(
+            "mcp_background_scan_completed",
+            extra={"job_id": job_id, "event": "background_scan_completed", "status": "completed"},
+        )
 
 
 def error_payload(exc: Exception) -> dict:
@@ -373,5 +498,11 @@ def error_payload(exc: Exception) -> dict:
             "message": exc.message,
             "redacted_url": exc.redacted_url,
             "retryable": False,
+        }
+    if hasattr(exc, "error_code"):
+        return {
+            "error_code": exc.error_code,
+            "message": str(exc),
+            "retryable": exc.error_code in {"FETCH_FAILED"},
         }
     return {"error_code": "MCP_TOOL_ERROR", "message": str(exc), "retryable": False}

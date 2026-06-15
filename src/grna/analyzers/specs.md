@@ -35,6 +35,7 @@ Convert repository files, documentation, configuration, tests, coverage, and Git
 - Test and coverage analyzer implemented in `test_coverage.py`.
 - Commit analyzer implemented in `commits.py`.
 - Spec and documentation analyzer implemented in `documentation.py`.
+- Release readiness analyzer implemented in `readiness.py`.
 - Dependency analyzer.
 
 ## Design Rules
@@ -111,3 +112,13 @@ Convert repository files, documentation, configuration, tests, coverage, and Git
 - Parses `coverage.xml`/Cobertura-style XML, `lcov.info`, and JaCoCo XML where practical.
 - Coverage is reported only from report evidence; the analyzer does not infer coverage from test source presence.
 - Missing test source, test report, and coverage report evidence are listed as explicit gaps.
+
+## Implemented Release Readiness Analyzer Contract
+
+- Input: a resolved repository directory path, `RepositoryInventory`, and the technology, documentation, interface, and test analyzer outputs.
+- Output: `ReadinessAnalysis` with report-ready dimension scores, documentation coverage details, lightweight security scan details, optional LLM reasoning metadata, gaps, and warnings.
+- Documentation coverage is evidence-driven: Python files are parsed with `ast` for module/class/function docstrings; JavaDoc/TSDoc/KDoc/PHPDoc-style comments are detected for supported non-Python source files using read-only text scanning.
+- Security scanning is intentionally lightweight and read-only. It detects sanitized secret-like patterns, private key markers, unsafe shell execution, dynamic code execution, insecure TLS flags, `curl | sh`, broad permission changes, and unsafe pickle deserialization.
+- Security findings must redact suspected secret values and include rule ID, severity, path, line, description, and a redacted snippet.
+- Security posture also records basic controls such as `SECURITY.md`, Dependabot, CodeQL workflows, CI workflows, and dependency lockfiles.
+- Optional Gemma/Ollama reasoning may provide advisory score suggestions for documentation coverage and security scan only; deterministic scores remain the primary source and LLM adjustment is bounded.

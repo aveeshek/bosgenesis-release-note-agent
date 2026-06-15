@@ -41,6 +41,8 @@ Validate that the agent safely scans public repositories, builds evidence-backed
 - HTML report smoke tests for inline theme tokens, cover/dashboard layout, print CSS, tables, callouts, Mermaid source, and evidence blocks.
 - PDF report tests for successful PDF bytes when the renderer is available and structured preservation metadata when rendering fails.
 - REST API contract tests for health/readiness, scan creation, job status, analytics placeholders, artifact metadata, artifact download, invalid URLs, and missing jobs.
+- CLI contract tests for local fixture scan, status lookup, analytics-driven `generate-note`, JSON output, and useful structured errors.
+- End-to-end MVP validation should run the CLI scan flow against the BOS Genesis MoP Creation Agent repository input and verify Markdown, HTML, PDF, analytics, evidence, and explicit gaps.
 - Deterministic evidence IDs, evidence lookup, commit/fact records, and redaction.
 - Technology, code, interface, test, coverage, commit, and spec analyzers.
 - Diagram generation.

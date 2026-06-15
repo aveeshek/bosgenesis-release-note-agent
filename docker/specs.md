@@ -2,13 +2,16 @@
 
 ## Intent
 
-Define containerization assets for local development and deployment of the API, MCP server, and worker processes.
+Define containerization assets for local development and deployment of the
+release-note agent runtime.
 
 ## Role
 
-- Store Dockerfile-related assets when code implementation begins.
+- Store Dockerfile-related assets.
 - Support repeatable local and CI builds.
-- Support API, MCP, and worker runtime profiles.
+- Support Docker-only local API runtime validation.
+- Do not add Docker Compose; Helm/Kubernetes is the multi-service deployment
+  path for this project.
 
 ## Inputs
 
@@ -18,8 +21,8 @@ Define containerization assets for local development and deployment of the API, 
 
 ## Outputs
 
-- Container images.
-- Optional compose support for PostgreSQL, Redis, API, MCP, and worker services.
+- Container image.
+- Docker-only smoke-test script.
 
 ## Design Rules
 
@@ -27,4 +30,4 @@ Define containerization assets for local development and deployment of the API, 
 - Build layers should separate dependencies from source where practical.
 - Runtime user should be non-root where possible.
 - Workspace and artifact paths must be mounted or configured explicitly.
-
+- Docker Compose files are intentionally out of scope.

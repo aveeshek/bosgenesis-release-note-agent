@@ -41,9 +41,11 @@ Expose the release-note agent through a REST API suitable for UI clients, automa
 ## Implemented REST MVP Contract
 
 - `create_app()` builds the FastAPI application and accepts an optional `ReleaseNoteMcpTools` instance for tests and future dependency injection.
-- `POST /api/v1/scans` validates the public GitHub URL, creates a queued local job, and returns HTTP `202`.
+- `POST /api/v1/scans` validates the public GitHub URL, runs the shared MVP
+  end-to-end pipeline, persists generated artifacts, and returns HTTP `202`
+  with completed job metadata when successful.
 - `GET /api/v1/scans/{job_id}` returns persisted job status from the shared job store.
-- `GET /api/v1/scans/{job_id}/analytics` returns the current analytics contract, including explicit placeholder availability until the worker pipeline is wired.
+- `GET /api/v1/scans/{job_id}/analytics` returns generated analytics JSON when the analytics artifact exists.
 - `GET /api/v1/scans/{job_id}/artifacts` returns artifact metadata, optionally filtered by `artifact_type`.
 - `GET /api/v1/scans/{job_id}/artifacts/{artifact_id}` returns metadata for a single artifact.
 - `GET /api/v1/scans/{job_id}/artifacts/{artifact_id}/download` streams the artifact file only after verifying it remains under the job artifact root.
@@ -51,7 +53,8 @@ Expose the release-note agent through a REST API suitable for UI clients, automa
 
 ## Design Rules
 
-- Request handlers must not perform long-running repository analysis inline.
+- Request handlers must delegate repository analysis to the shared runtime
+  pipeline; future worker mode can move the same pipeline behind an async queue.
 - API schemas must be explicit and versioned.
 - API and MCP paths must share the same core services.
 - Errors must include `error_code`, `message`, optional `details`, and `retryable`.

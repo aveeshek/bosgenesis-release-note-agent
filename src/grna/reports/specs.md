@@ -71,12 +71,16 @@ Generate professional release-note artifacts from the normalized evidence and an
 - `HtmlReleaseNoteRenderer` renders a complete self-contained HTML document from `ReleaseNoteContent`.
 - The HTML artifact includes inline CSS only and must not require external network fonts, scripts, stylesheets, or images.
 - The cover page acts as an executive dashboard with release identity, repository, generated timestamp, evidence counts, known gaps, and metric tiles.
-- Standard pages include compact headers, numbered sections, tables, callouts, Mermaid source blocks, and evidence blocks.
+- Standard pages include compact headers, numbered sections, tables, callouts, rendered Mermaid-style diagrams or source fallback, and evidence blocks.
+- The Release Readiness Assessment must prefer the analytics `readiness` section when present. Documentation and safety scores must come from source documentation coverage and lightweight security scan evidence rather than fixed template values.
 - HTML is designed as the PDF source with A4 print rules, page-like sections, table wrapping, and explicit missing-evidence language.
 
 ## Implemented PDF Renderer Contract
 
-- `PdfReleaseNoteRenderer` is the initial PDF backend and uses ReportLab when the dependency is available.
+- `PdfReleaseNoteRenderer` uses the styled self-contained HTML report as the
+  primary PDF source when a supported headless browser is available.
+- Default PDF generation must use the styled HTML renderer; unstyled ReportLab
+  fallback is opt-in only for developer diagnostics.
 - `PdfRenderResult` reports whether rendering succeeded, which renderer was used, whether HTML and Markdown artifacts remain preserved, and any error message.
 - PDF output preserves the cover/dashboard, page footer with page numbers, compact tables, evidence appendix, and Mermaid source fallback.
 - If PDF rendering fails, the renderer returns a structured failure result and does not discard Markdown or HTML source artifacts.

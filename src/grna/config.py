@@ -23,6 +23,10 @@ DEFAULT_MAX_REPO_SIZE_MB = 500
 DEFAULT_MAX_FILE_SIZE_MB = 10
 DEFAULT_CLONE_TIMEOUT_SECONDS = 120
 DEFAULT_ANALYSIS_TIMEOUT_SECONDS = 600
+DEFAULT_LANGFUSE_ENDPOINT = "http://langfuse-web.bosgenesis.svc.cluster.local:3000"
+DEFAULT_OTLP_ENDPOINT = "http://signoz-otel-collector.signoz.svc.cluster.local:4317"
+DEFAULT_OLLAMA_BASE_URL = "http://ollama.bosgenesis.svc.cluster.local:11434"
+DEFAULT_OLLAMA_MODEL = "gemma4:26b"
 DEFAULT_MCP_ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
@@ -86,7 +90,21 @@ class AppConfig:
     redis_url: str | None = None
     enable_otel: bool = False
     enable_langfuse: bool = False
+    langfuse_endpoint: str = DEFAULT_LANGFUSE_ENDPOINT
+    langfuse_public_key: str | None = None
+    langfuse_secret_key: str | None = None
+    otlp_endpoint: str = DEFAULT_OTLP_ENDPOINT
+    enable_observability_audit: bool = True
+    enable_observability_phase_metrics: bool = True
+    enable_observability_warning_taxonomy: bool = True
     enable_llm_summary: bool = False
+    enable_llm_reasoning: bool = False
+    llm_default_model: str = DEFAULT_OLLAMA_MODEL
+    llm_provider: str = "ollama"
+    ollama_base_url: str = DEFAULT_OLLAMA_BASE_URL
+    llm_temperature: float = 0.2
+    llm_max_tokens: int = 900
+    llm_minimum_confidence: float = 0.85
     enable_pdf_rendering: bool = True
 
     @classmethod
@@ -124,7 +142,32 @@ class AppConfig:
             redis_url=os.getenv("GRNA_REDIS_URL") or None,
             enable_otel=_get_bool("GRNA_ENABLE_OTEL", False),
             enable_langfuse=_get_bool("GRNA_ENABLE_LANGFUSE", False),
+            langfuse_endpoint=os.getenv("LANGFUSE_HOST", DEFAULT_LANGFUSE_ENDPOINT),
+            langfuse_public_key=os.getenv("LANGFUSE_PUBLIC_KEY") or None,
+            langfuse_secret_key=os.getenv("LANGFUSE_SECRET_KEY") or None,
+            otlp_endpoint=os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", DEFAULT_OTLP_ENDPOINT),
+            enable_observability_audit=_get_bool("OBSERVABILITY_AUDIT_ENABLED", True),
+            enable_observability_phase_metrics=_get_bool(
+                "OBSERVABILITY_PHASE_METRICS_ENABLED",
+                True,
+            ),
+            enable_observability_warning_taxonomy=_get_bool(
+                "OBSERVABILITY_WARNING_TAXONOMY_ENABLED",
+                True,
+            ),
             enable_llm_summary=_get_bool("GRNA_ENABLE_LLM_SUMMARY", False),
+            enable_llm_reasoning=_get_bool(
+                "GRNA_ENABLE_LLM_REASONING",
+                _get_bool("GRNA_ENABLE_LLM_SUMMARY", False),
+            ),
+            llm_default_model=os.getenv("GRNA_LLM_DEFAULT_MODEL")
+            or os.getenv("OLLAMA_MODEL", DEFAULT_OLLAMA_MODEL),
+            llm_provider=os.getenv("GRNA_LLM_PROVIDER", "ollama"),
+            ollama_base_url=os.getenv("GRNA_OLLAMA_BASE_URL")
+            or os.getenv("OLLAMA_BASE_URL", DEFAULT_OLLAMA_BASE_URL),
+            llm_temperature=float(os.getenv("GRNA_LLM_TEMPERATURE", "0.2")),
+            llm_max_tokens=_get_int("GRNA_LLM_MAX_TOKENS", 900),
+            llm_minimum_confidence=float(os.getenv("GRNA_LLM_MINIMUM_CONFIDENCE", "0.85")),
             enable_pdf_rendering=_get_bool(
                 "GRNA_ENABLE_PDF_RENDERING",
                 True,

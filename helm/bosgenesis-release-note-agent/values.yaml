@@ -42,8 +42,18 @@ config:
   enableCli: "true"
   enablePdfRendering: "true"
   enableLlmSummary: "false"
+  enableLlmReasoning: "true"
+  llmDefaultModel: "gemma4:26b"
+  llmProvider: "ollama"
+  ollamaBaseUrl: "http://ollama.bosgenesis.svc.cluster.local:11434"
+  llmMinimumConfidence: "0.85"
   enableOtel: "false"
   enableLangfuse: "false"
+  langfuseHost: "http://langfuse-web.bosgenesis.svc.cluster.local:3000"
+  otelExporterOtlpEndpoint: "http://signoz-otel-collector.signoz.svc.cluster.local:4317"
+  observabilityAuditEnabled: "true"
+  observabilityPhaseMetricsEnabled: "true"
+  observabilityWarningTaxonomyEnabled: "true"
   mcpAllowedHosts: "localhost,127.0.0.1,release-note-agent.bosgenesis.local,bosgenesis-release-note-agent-mcp,bosgenesis-release-note-agent-mcp.bosgenesis.svc,bosgenesis-release-note-agent-mcp.bosgenesis.svc.cluster.local"
 
 external:
@@ -53,6 +63,12 @@ external:
   redisUrlSecret:
     name: ""
     key: REDIS_URL
+  langfusePublicKeySecret:
+    name: ""
+    key: LANGFUSE_PUBLIC_KEY
+  langfuseSecretKeySecret:
+    name: ""
+    key: LANGFUSE_SECRET_KEY
 
 api:
   enabled: true

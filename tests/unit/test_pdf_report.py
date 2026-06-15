@@ -15,7 +15,7 @@ def test_pdf_renderer_generates_pdf_or_structured_dependency_failure() -> None:
 
     result = PdfReleaseNoteRenderer().render(content, html=html, markdown=markdown)
 
-    assert result.renderer == "reportlab"
+    assert result.renderer == "html-browser"
     assert result.html_preserved is True
     assert result.markdown_preserved is True
     if result.ok:
@@ -31,10 +31,10 @@ def test_pdf_renderer_preserves_html_and_markdown_on_render_failure(monkeypatch)
     content = _content()
     renderer = PdfReleaseNoteRenderer()
 
-    def fail(_: ReleaseNoteContent) -> bytes:
-        raise RuntimeError("pdf backend unavailable")
+    def fail_html(_: str) -> bytes:
+        raise RuntimeError("html backend unavailable")
 
-    monkeypatch.setattr(renderer, "_render_with_reportlab", fail)
+    monkeypatch.setattr(renderer, "_render_html_with_browser", fail_html)
 
     result = renderer.render(content, html="<html></html>", markdown="# report")
 
@@ -42,7 +42,46 @@ def test_pdf_renderer_preserves_html_and_markdown_on_render_failure(monkeypatch)
     assert result.pdf_bytes is None
     assert result.html_preserved is True
     assert result.markdown_preserved is True
-    assert result.error_message == "pdf backend unavailable"
+    assert "html backend unavailable" in result.error_message
+
+
+def test_pdf_renderer_prefers_html_backend(monkeypatch) -> None:
+    content = _content()
+    renderer = PdfReleaseNoteRenderer()
+
+    monkeypatch.setattr(renderer, "_render_html_with_browser", lambda _: b"%PDF-styled")
+
+    result = renderer.render(content, html="<html></html>", markdown="# report")
+
+    assert result.ok is True
+    assert result.renderer == "html-browser"
+    assert result.pdf_bytes == b"%PDF-styled"
+
+
+def test_pdf_renderer_reportlab_fallback_is_opt_in(monkeypatch) -> None:
+    content = _content()
+    renderer = PdfReleaseNoteRenderer()
+
+    monkeypatch.setattr(
+        renderer,
+        "_render_html_with_browser",
+        lambda _: (_ for _ in ()).throw(RuntimeError("html backend unavailable")),
+    )
+    monkeypatch.setattr(renderer, "_render_with_reportlab", lambda _: b"%PDF-fallback")
+
+    default_result = renderer.render(content, html="<html></html>", markdown="# report")
+    fallback_result = renderer.render(
+        content,
+        html="<html></html>",
+        markdown="# report",
+        allow_reportlab_fallback=True,
+    )
+
+    assert default_result.ok is False
+    assert default_result.renderer == "html-browser"
+    assert fallback_result.ok is True
+    assert fallback_result.renderer == "reportlab"
+    assert fallback_result.pdf_bytes == b"%PDF-fallback"
 
 
 def _content() -> ReleaseNoteContent:

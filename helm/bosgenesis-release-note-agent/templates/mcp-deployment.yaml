@@ -42,6 +42,20 @@ spec:
           env:
             - name: GRNA_MCP_PORT
               value: {{ .Values.mcp.port | quote }}
+            {{- if .Values.external.langfusePublicKeySecret.name }}
+            - name: LANGFUSE_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.external.langfusePublicKeySecret.name }}
+                  key: {{ .Values.external.langfusePublicKeySecret.key }}
+            {{- end }}
+            {{- if .Values.external.langfuseSecretKeySecret.name }}
+            - name: LANGFUSE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.external.langfuseSecretKeySecret.name }}
+                  key: {{ .Values.external.langfuseSecretKeySecret.key }}
+            {{- end }}
           volumeMounts:
             - name: data
               mountPath: /data
@@ -66,4 +80,3 @@ spec:
           emptyDir: {}
           {{- end }}
 {{- end }}
-

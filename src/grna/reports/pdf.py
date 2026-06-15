@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
+import os
+import shutil
+import subprocess
 from dataclasses import dataclass
 from io import BytesIO
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any
 
 from grna.reports.markdown import ReleaseNoteContent
@@ -22,9 +27,9 @@ class PdfRenderResult:
 
 
 class PdfReleaseNoteRenderer:
-    """Render a styled PDF using ReportLab when available."""
+    """Render a styled PDF from HTML, with ReportLab fallback when needed."""
 
-    renderer_name = "reportlab"
+    renderer_name = "html-browser"
 
     def render(
         self,
@@ -32,27 +37,117 @@ class PdfReleaseNoteRenderer:
         *,
         html: str,
         markdown: str,
+        allow_reportlab_fallback: bool = False,
     ) -> PdfRenderResult:
         """Render PDF bytes while preserving source artifacts on failure."""
 
-        try:
-            pdf_bytes = self._render_with_reportlab(content)
-        except Exception as exc:  # pragma: no cover - exact dependency failures vary.
+        html_error: Exception | None = None
+        if html:
+            try:
+                return PdfRenderResult(
+                    ok=True,
+                    pdf_bytes=self._render_html_with_browser(html),
+                    renderer=self.renderer_name,
+                    html_preserved=bool(html),
+                    markdown_preserved=bool(markdown),
+                )
+            except Exception as exc:  # pragma: no cover - browser availability varies.
+                html_error = exc
+
+        if not allow_reportlab_fallback:
+            message = (
+                f"HTML PDF render failed: {html_error}"
+                if html_error is not None
+                else "HTML PDF render failed because no HTML source was provided."
+            )
             return PdfRenderResult(
                 ok=False,
                 pdf_bytes=None,
                 renderer=self.renderer_name,
                 html_preserved=bool(html),
                 markdown_preserved=bool(markdown),
-                error_message=str(exc),
+                error_message=message,
+            )
+
+        try:
+            pdf_bytes = self._render_with_reportlab(content)
+        except Exception as exc:  # pragma: no cover - exact dependency failures vary.
+            message = str(exc)
+            if html_error is not None:
+                message = f"HTML PDF render failed: {html_error}; ReportLab fallback failed: {exc}"
+            return PdfRenderResult(
+                ok=False,
+                pdf_bytes=None,
+                renderer="reportlab",
+                html_preserved=bool(html),
+                markdown_preserved=bool(markdown),
+                error_message=message,
             )
         return PdfRenderResult(
             ok=True,
             pdf_bytes=pdf_bytes,
-            renderer=self.renderer_name,
+            renderer="reportlab",
             html_preserved=bool(html),
             markdown_preserved=bool(markdown),
         )
+
+    def _render_html_with_browser(self, html: str) -> bytes:
+        browser = _find_pdf_browser()
+        if browser is None:
+            raise RuntimeError("No supported headless browser found for HTML PDF rendering.")
+
+        with TemporaryDirectory(prefix="grna-pdf-") as temp_dir:
+            temp_path = Path(temp_dir)
+            html_path = temp_path / "release-note.html"
+            pdf_path = temp_path / "release-note.pdf"
+            profile_path = temp_path / "chrome-profile"
+            cache_path = temp_path / "chrome-cache"
+            crash_path = temp_path / "chrome-crashes"
+            profile_path.mkdir(parents=True, exist_ok=True)
+            cache_path.mkdir(parents=True, exist_ok=True)
+            crash_path.mkdir(parents=True, exist_ok=True)
+            html_path.write_text(html, encoding="utf-8")
+            result = subprocess.run(
+                [
+                    str(browser),
+                    "--headless=new",
+                    "--disable-gpu",
+                    "--disable-dev-shm-usage",
+                    "--disable-breakpad",
+                    "--disable-crash-reporter",
+                    "--disable-crashpad",
+                    "--disable-features=Crashpad",
+                    "--no-sandbox",
+                    "--no-first-run",
+                    "--noerrdialogs",
+                    "--password-store=basic",
+                    "--run-all-compositor-stages-before-draw",
+                    "--virtual-time-budget=1000",
+                    "--print-to-pdf-no-header",
+                    f"--user-data-dir={profile_path}",
+                    f"--disk-cache-dir={cache_path}",
+                    f"--crash-dumps-dir={crash_path}",
+                    f"--print-to-pdf={pdf_path}",
+                    html_path.as_uri(),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=120,
+                check=False,
+                env={
+                    **os.environ,
+                    "HOME": str(temp_path),
+                    "XDG_CONFIG_HOME": str(profile_path),
+                    "XDG_CACHE_HOME": str(cache_path),
+                    "XDG_STATE_HOME": str(crash_path),
+                },
+            )
+            if pdf_path.exists():
+                pdf_bytes = pdf_path.read_bytes()
+                if pdf_bytes.startswith(b"%PDF"):
+                    return pdf_bytes
+            reason = (result.stderr or result.stdout or "").strip()
+            raise RuntimeError(reason or f"{browser.name} exited with {result.returncode}")
 
     def _render_with_reportlab(self, content: ReleaseNoteContent) -> bytes:
         from reportlab.lib import colors
@@ -273,3 +368,26 @@ def _xml(value: Any) -> str:
         .replace("<", "&lt;")
         .replace(">", "&gt;")
     )
+
+
+def _find_pdf_browser() -> Path | None:
+    configured = os.getenv("GRNA_PDF_BROWSER_PATH")
+    if configured:
+        path = Path(configured)
+        if path.exists():
+            return path
+
+    for name in ("msedge", "microsoft-edge", "google-chrome", "chromium", "chromium-browser"):
+        resolved = shutil.which(name)
+        if resolved:
+            return Path(resolved)
+
+    for candidate in (
+        Path("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"),
+        Path("C:/Program Files/Microsoft/Edge/Application/msedge.exe"),
+        Path("C:/Program Files/Google/Chrome/Application/chrome.exe"),
+        Path("C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"),
+    ):
+        if candidate.exists():
+            return candidate
+    return None

@@ -22,6 +22,16 @@ data:
   GRNA_ENABLE_CLI: {{ .Values.config.enableCli | quote }}
   GRNA_ENABLE_PDF_RENDERING: {{ .Values.config.enablePdfRendering | quote }}
   GRNA_ENABLE_LLM_SUMMARY: {{ .Values.config.enableLlmSummary | quote }}
+  GRNA_ENABLE_LLM_REASONING: {{ .Values.config.enableLlmReasoning | quote }}
+  GRNA_LLM_DEFAULT_MODEL: {{ .Values.config.llmDefaultModel | quote }}
+  GRNA_LLM_PROVIDER: {{ .Values.config.llmProvider | quote }}
+  GRNA_OLLAMA_BASE_URL: {{ .Values.config.ollamaBaseUrl | quote }}
+  GRNA_LLM_MINIMUM_CONFIDENCE: {{ .Values.config.llmMinimumConfidence | quote }}
   GRNA_ENABLE_OTEL: {{ .Values.config.enableOtel | quote }}
   GRNA_ENABLE_LANGFUSE: {{ .Values.config.enableLangfuse | quote }}
+  LANGFUSE_HOST: {{ .Values.config.langfuseHost | quote }}
+  OTEL_EXPORTER_OTLP_ENDPOINT: {{ .Values.config.otelExporterOtlpEndpoint | quote }}
+  OBSERVABILITY_AUDIT_ENABLED: {{ .Values.config.observabilityAuditEnabled | quote }}
+  OBSERVABILITY_PHASE_METRICS_ENABLED: {{ .Values.config.observabilityPhaseMetricsEnabled | quote }}
+  OBSERVABILITY_WARNING_TAXONOMY_ENABLED: {{ .Values.config.observabilityWarningTaxonomyEnabled | quote }}
   GRNA_MCP_ALLOWED_HOSTS: {{ .Values.config.mcpAllowedHosts | quote }}

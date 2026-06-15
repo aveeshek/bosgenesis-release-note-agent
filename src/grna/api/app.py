@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field, ValidationError
 from grna.config import get_config
 from grna.mcp.schemas import AnalysisDepth, OutputFormat
 from grna.mcp.tools import ReleaseNoteMcpTools, error_payload
+from grna.observability import record_artifact_download_audit
 from grna.storage.models import ArtifactMetadata
 
 
@@ -80,7 +81,21 @@ def create_app(tools: ReleaseNoteMcpTools | None = None) -> FastAPI:
         artifact = _get_artifact_metadata(app, job_id, artifact_id)
         artifact_path = _safe_artifact_path(app, job_id, artifact)
         if not artifact_path.exists() or not artifact_path.is_file():
+            record_artifact_download_audit(
+                job_id=job_id,
+                artifact_id=artifact_id,
+                artifact_type=artifact.artifact_type,
+                relative_path=artifact.relative_path,
+                status="missing",
+            )
             raise HTTPException(status_code=404, detail="Artifact file not found.")
+        record_artifact_download_audit(
+            job_id=job_id,
+            artifact_id=artifact_id,
+            artifact_type=artifact.artifact_type,
+            relative_path=artifact.relative_path,
+            status="ok",
+        )
         return FileResponse(
             artifact_path,
             media_type=artifact.content_type or "application/octet-stream",

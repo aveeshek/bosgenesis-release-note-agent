@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 from dataclasses import asdict, dataclass
@@ -257,10 +258,13 @@ def _run_git(
     cwd: Path | None = None,
     env: dict[str, str] | None = None,
 ) -> str:
+    merged_env = os.environ.copy()
+    if env:
+        merged_env.update(env)
     result = subprocess.run(
         ["git", *args],
         cwd=cwd,
-        env=env,
+        env=merged_env,
         capture_output=True,
         check=False,
         text=True,

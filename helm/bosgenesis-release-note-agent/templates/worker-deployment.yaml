@@ -28,6 +28,23 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "bosgenesis-release-note-agent.fullname" . }}-config
+          {{- if or .Values.external.langfusePublicKeySecret.name .Values.external.langfuseSecretKeySecret.name }}
+          env:
+            {{- if .Values.external.langfusePublicKeySecret.name }}
+            - name: LANGFUSE_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.external.langfusePublicKeySecret.name }}
+                  key: {{ .Values.external.langfusePublicKeySecret.key }}
+            {{- end }}
+            {{- if .Values.external.langfuseSecretKeySecret.name }}
+            - name: LANGFUSE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.external.langfuseSecretKeySecret.name }}
+                  key: {{ .Values.external.langfuseSecretKeySecret.key }}
+            {{- end }}
+          {{- end }}
           volumeMounts:
             - name: data
               mountPath: /data
@@ -44,4 +61,3 @@ spec:
           emptyDir: {}
           {{- end }}
 {{- end }}
-

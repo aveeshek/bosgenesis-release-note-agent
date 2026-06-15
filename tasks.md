@@ -438,20 +438,20 @@
 
 **Requirement mapping:** LLD Runtime Modes  
 **Type:** CLI  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Add `scan` command.
-- [ ] Add `status` command.
-- [ ] Add `generate-note` command for local analytics input.
-- [ ] Add JSON output option.
-- [ ] Add CLI tests.
+- [x] Add `scan` command.
+- [x] Add `status` command.
+- [x] Add `generate-note` command for local analytics input.
+- [x] Add JSON output option.
+- [x] Add CLI tests.
 
 ### Acceptance Criteria
 
-- [ ] CLI can run a local end-to-end MVP scan.
-- [ ] CLI returns useful errors.
+- [x] CLI can run a local end-to-end MVP scan.
+- [x] CLI returns useful errors.
 
 ## Task T-023 - Implement MCP Server MVP
 
@@ -477,21 +477,21 @@
 
 **Requirement mapping:** Definition of Done items 1-12  
 **Type:** Integration  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Wire fetcher, inventory, evidence, analyzers, diagrams, and report generation.
-- [ ] Run against `https://github.com/aveeshek/bosgenesis-mop-creation-agent`.
-- [ ] Generate Markdown, HTML, and PDF artifacts.
-- [ ] Review report for evidence accuracy.
-- [ ] Capture known gaps.
+- [x] Wire fetcher, inventory, evidence, analyzers, diagrams, and report generation.
+- [x] Run against `https://github.com/aveeshek/bosgenesis-mop-creation-agent`.
+- [x] Generate Markdown, HTML, and PDF artifacts.
+- [x] Review report for evidence accuracy.
+- [x] Capture known gaps.
 
 ### Acceptance Criteria
 
-- [ ] Given a GitHub URL, agent generates a human-readable release note.
-- [ ] Report follows the reference style contract.
-- [ ] Claims include evidence references or explicit gaps.
+- [x] Given a GitHub URL, agent generates a human-readable release note.
+- [x] Report follows the reference style contract.
+- [x] Claims include evidence references or explicit gaps.
 
 ## Task T-025 - Add Security and Safety Hardening
 
@@ -518,38 +518,39 @@
 
 **Requirement mapping:** NFR-004  
 **Type:** Hardening  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Add structured job-stage logs.
-- [ ] Add analyzer duration metrics hooks.
-- [ ] Add artifact generation events.
-- [ ] Add audit events for job creation and artifact download.
-- [ ] Add tests for log/event shapes where practical.
+- [x] Add structured job-stage logs.
+- [x] Add analyzer duration metrics hooks.
+- [x] Add artifact generation events.
+- [x] Add audit events for job creation and artifact download.
+- [x] Add tests for log/event shapes where practical.
 
 ### Acceptance Criteria
 
-- [ ] Each major stage emits start/completion/failure logs.
-- [ ] Logs include `job_id`, `stage`, `event`, and `status`.
+- [x] Each major stage emits start/completion/failure logs.
+- [x] Logs include `job_id`, `stage`, `event`, and `status`.
 
 ## Task T-027 - Add Docker and Local Runtime Support
 
 **Requirement mapping:** Phase 5 Production Hardening  
 **Type:** Deployment  
-**Status:** Not Started
+**Status:** Done
 
 ### Steps
 
-- [ ] Add Dockerfile.
-- [ ] Add docker-compose for API, worker, Redis, and optional PostgreSQL.
-- [ ] Document local run commands.
-- [ ] Add container smoke test.
+- [x] Add Dockerfile.
+- [x] Docker Compose intentionally excluded by project decision; use Dockerfile
+  for local API runtime and Helm/Kubernetes for deployment.
+- [x] Document local run commands.
+- [x] Add container smoke test.
 
 ### Acceptance Criteria
 
-- [ ] API can run in container locally.
-- [ ] Artifact and workspace paths are configurable.
+- [x] API can run in container locally.
+- [x] Artifact and workspace paths are configurable.
 
 ## Task T-028 - Add Helm Chart Skeleton
 

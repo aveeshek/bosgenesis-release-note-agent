@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from grna.github import RepositoryFetcher, RepositoryFetchError
+from grna.github import fetcher as fetcher_module
 from grna.utils.paths import PathTraversalError
 
 
@@ -101,6 +102,25 @@ def test_fetcher_rejects_ambiguous_refs(tmp_path) -> None:
         )
 
     assert exc_info.value.error_code == "AMBIGUOUS_REF"
+
+
+def test_run_git_merges_custom_env_with_process_env(monkeypatch) -> None:
+    captured = {}
+    monkeypatch.setenv("GRNA_TEST_ENV_SENTINEL", "present")
+
+    def fake_run(args, **kwargs):
+        captured["args"] = args
+        captured["env"] = kwargs["env"]
+        return subprocess.CompletedProcess(args=args, returncode=0, stdout="ok\n", stderr="")
+
+    monkeypatch.setattr(fetcher_module.subprocess, "run", fake_run)
+
+    output = fetcher_module._run_git(["status"], env={"GIT_TERMINAL_PROMPT": "0"})
+
+    assert output == "ok"
+    assert captured["args"] == ["git", "status"]
+    assert captured["env"]["GIT_TERMINAL_PROMPT"] == "0"
+    assert captured["env"]["GRNA_TEST_ENV_SENTINEL"] == "present"
 
 
 def _git(args: list[str], cwd: Path) -> str:
