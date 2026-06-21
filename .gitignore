@@ -4,6 +4,7 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .venv/
+.env
 data/jobs/*.json
 data/artifacts/**
 data/logs/**
