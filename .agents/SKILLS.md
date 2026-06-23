@@ -1,3 +1,8 @@
+---
+name: bosgenesis-release-note-agent
+description: Use when Codex needs to scan public GitHub repositories and generate evidence-backed BOS Genesis release notes through `bosgenesis_release_note_agent`, including repository scans, job polling, analytics, evidence, diagrams, Markdown/HTML/PDF artifacts, and release-note artifact retrieval.
+---
+
 # BOS Genesis Release Note Agent Skills
 
 ## Purpose
@@ -25,18 +30,18 @@ Invoke:   POST /mcp/tools/{tool_name}
 
 Implemented now:
 
-- Start a scan job and persist queued job status.
-- Poll scan job status.
-- List tool schemas through compatibility routes.
-- List artifact metadata for a job.
-- Expose all required MCP contract tools as callable placeholders.
-- Return placeholders for analytics, evidence, diagrams, and release-note generation.
+- Start repository scan and release-note jobs.
+- Poll job status.
+- Run repository, commit, code, documentation, interface, technology, readiness, and test coverage analyzers.
+- Generate evidence-backed Markdown, HTML, and PDF release-note artifacts when the pipeline completes.
+- List artifact metadata and retrieve artifact references.
+- Retrieve analytics, evidence summaries, and diagram metadata when available.
+- Expose canonical and compatibility MCP tool names.
 
 Not implemented yet:
 
-- Repository cloning and analysis pipeline.
-- Release-note Markdown, HTML, and PDF generation.
-- Real evidence indexing and artifact generation.
+- Private repository authentication and dependency execution are not part of the default safe workflow.
+- Direct binary streaming through MCP is not required; use artifact metadata and REST/compatibility routes for downloads.
 
 ## Available Tools
 
@@ -103,7 +108,7 @@ List generated artifact metadata for a job. `artifact_type` is optional.
 - `get_release_note_artifact`
 - `get_release_note_artifacts`
 
-These currently return placeholders until the analyzer and report pipeline tasks are implemented.
+Use the compatibility names only when a client or plan requires them; otherwise prefer the canonical `github_release_*` names.
 
 ## Manual Smoke Tests
 
@@ -133,7 +138,7 @@ When a user gives a GitHub repository URL:
 1. Call `github_release_scan_start`.
 2. Return the `job_id`.
 3. Poll `github_release_scan_status`.
-4. When analyzers are implemented, call `github_release_get_analytics`, `github_release_generate_note`, and `github_release_get_artifact`.
+4. Call `github_release_get_analytics`, `github_release_generate_note`, and `github_release_get_artifact` after the job reaches a reportable state.
 5. Report missing artifacts clearly if generation is not available yet.
 
 ## Safety Rules

@@ -34,6 +34,33 @@ enabled_tools = [
   "get_release_note_artifacts",
 ]
 
+[mcp_servers.bosgenesis_release_note_agent.tools.github_release_scan_start]
+approval_mode = "prompt"
+
+[mcp_servers.bosgenesis_release_note_agent.tools.github_release_generate_note]
+approval_mode = "prompt"
+
+[mcp_servers.bosgenesis_release_note_agent.tools.github_release_note_submit_job]
+approval_mode = "prompt"
+
+[mcp_servers.bosgenesis_release_note_agent.tools.github_release_note_cancel_job]
+approval_mode = "prompt"
+
+[mcp_servers.bosgenesis_release_note_agent.tools.github_repo_scan_only]
+approval_mode = "prompt"
+
+[mcp_servers.bosgenesis_release_note_agent.tools.github_commit_analytics_only]
+approval_mode = "prompt"
+
+[mcp_servers.bosgenesis_release_note_agent.tools.github_code_analytics_only]
+approval_mode = "prompt"
+
+[mcp_servers.bosgenesis_release_note_agent.tools.scan_github_repository]
+approval_mode = "prompt"
+
+[mcp_servers.bosgenesis_release_note_agent.tools.generate_release_note]
+approval_mode = "prompt"
+
 [agent]
 name = "bosgenesis-release-note-agent"
 description = "BOS Genesis agent for generating evidence-backed release notes from public GitHub repositories."
